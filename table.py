@@ -1,11 +1,7 @@
 import sqlite3
 from prettytable import from_db_cursor
 import re
-
 import soup
-
-conn = sqlite3.connect('cfr.db')
-cur = conn.cursor()
 
 
 def find_hazmat_table(table):
@@ -15,7 +11,7 @@ def find_hazmat_table(table):
 
 def create_nonunique_table(cur, table_name, col_name):
     cur.execute('''
-            CREATE TABLE {} (
+            CREATE TABLE IF NOT EXISTS {} (
             hazmat_id integer not null,
             {} text,
             FOREIGN KEY (hazmat_id)
@@ -28,6 +24,7 @@ def load_nonunique_table(cur, hazmat_id, text, table_name, col_name):
     if table_name == "symbols":
         split_text = re.findall("[A-Z]", text)
     else:
+        # TO DO: some are split on "," without a space
         split_text = text.split(", ")
     entries = [(hazmat_id, entry.replace("'", "''").strip())
                for entry in split_text]
@@ -60,9 +57,12 @@ def load_ents(row, pk, cur):
         )
 
 
+conn = sqlite3.connect('cfr.db')
+cur = conn.cursor()
+
 cur.execute(
     '''
-    CREATE TABLE hazmat_table (
+    CREATE TABLE IF NOT EXISTS hazmat_table (
         hazmat_id integer not null primary key,
         hazmat_name text, class_division text,
         id_num text, pg text, rail_max_quant text,
@@ -84,6 +84,4 @@ for row in hazmat_table.find_all('row')[1:]:
     # TO DO: check that data starts at row 1
     load_ents(row, pk, cur)
     pk += 1
-
 conn.commit()
-conn.close()
