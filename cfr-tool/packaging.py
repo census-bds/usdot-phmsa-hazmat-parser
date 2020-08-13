@@ -33,11 +33,11 @@ def packaging():
                 table_name = "non_bulk_packaging"
             hazmat_id_query = hazmat_db.execute(
                 '''
-                SELECT hazmat_id FROM hazmat_table
+                SELECT hazmat_id, hazmat_name FROM hazmat_table
                 WHERE id_num = '{}';
                 '''.format(un_id))
             #TO DO : right now we take the first one, need to address UNIDs with >1 row
-            hazmat_id = hazmat_id_query.fetchone()[0]
+            hazmat_id, hazmat_name = hazmat_id_query.fetchone()
             requirement = hazmat_db.execute(
                 '''
                 SELECT requirement FROM {} 
@@ -53,7 +53,11 @@ def packaging():
             response.headers['Content-Type'] = 'application/xml'
             return response
             '''
-            return render_template('results.html', results=subpart_tag.parent)
+            results_dict = {'UNID': un_id,
+                            'hazmat_name': hazmat_name,
+                            'bulk': 'Bulk' if bulk else 'Non-Bulk',
+                            'text': subpart_tag.parent}
+            return render_template('results.html', results=results_dict)
 
 
         flash(error)
