@@ -1,0 +1,16 @@
+<!doctype html>
+<title>Hazmat Lookup Tool</title>
+<section class="form">
+    <form method="post">
+        <label for="un_id">UN ID</label>
+        <input name="un_id" id="un_id" required>
+        <label for="bulk">Bulk Packaging?</label>
+        <input type="checkbox" name="bulk" id="bulk">
+        <input type="submit" value="Lookup">
+    </form>
+    
+    {% for message in get_flashed_messages() %}
+        <div class="flash">{{ message }}</div>
+    {% endfor %}
+
+</section>

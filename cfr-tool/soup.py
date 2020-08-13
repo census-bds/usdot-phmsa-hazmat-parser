@@ -2,6 +2,8 @@ import requests
 import bs4
 import xml.etree.ElementTree as ET
 
+#TO DO: switch from bs4 to ElementTree since I'm having trouble downloading lxml
+
 # govinfo xml url from which to parse the hazmat table
 CFR_URL = 'https://www.govinfo.gov/content/pkg/CFR-2019-title49-vol2/xml/CFR-2019-title49-vol2.xml'
 
