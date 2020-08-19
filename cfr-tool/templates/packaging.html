@@ -2,11 +2,22 @@
 <title>Hazmat Lookup Tool</title>
 <section class="form">
     <form method="post">
+        <h2>Packaging regulations lookup</h2>
         <label for="un_id">UN ID</label>
-        <input name="un_id" id="un_id" required>
+        <input name="un_id" id="un_id" required><br><br>
         <label for="bulk">Bulk Packaging?</label>
         <input type="checkbox" name="bulk" id="bulk">
-        <input type="submit" value="Lookup">
+        <h3>Mode of Transportation</h3>
+        <input type="radio" id="road" name="transit-mode" value="road">
+        <label for="road">Road</label><br>
+        <input type="radio" id="air-cargo" name="transit-mode" value="air-cargo">
+        <label for="air-cargo">Air Cargo</label><br>
+        <input type="radio" id="passenger-air" name="transit-mode" value="passenger-air">
+        <label for="passenger-air">Passenger Air</label><br>
+        <input type="radio" id="rail" name="transit-mode" value="rail">
+        <label for="rail">Rail</label><br><br>
+        <input type="submit" value="Lookup"><br>
+        
     </form>
     
     {% for message in get_flashed_messages() %}

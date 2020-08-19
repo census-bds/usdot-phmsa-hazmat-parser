@@ -33,11 +33,12 @@ def packaging():
                 table_name = "non_bulk_packaging"
             hazmat_id_query = hazmat_db.execute(
                 '''
-                SELECT hazmat_id, hazmat_name FROM hazmat_table
+                SELECT hazmat_id, hazmat_name, class_division FROM hazmat_table
                 WHERE id_num = '{}';
                 '''.format(un_id))
             #TO DO : right now we take the first one, need to address UNIDs with >1 row
-            hazmat_id, hazmat_name = hazmat_id_query.fetchone()
+            hazmat_id, hazmat_name, class_division = hazmat_id_query.fetchone()
+            print(class_division)
             requirement = hazmat_db.execute(
                 '''
                 SELECT requirement FROM {} 
@@ -47,15 +48,11 @@ def packaging():
             subpart_string = requirement.fetchall()[0][0]
             subpart_tag = soup.SOUP.find(
                 'sectno', text="§ 173.{}".format(subpart_string))
-            '''
-            template = render_template('results.xml', results=subpart_tag.parent)
-            response = make_response(template)
-            response.headers['Content-Type'] = 'application/xml'
-            return response
-            '''
+            
             results_dict = {'UNID': un_id,
                             'hazmat_name': hazmat_name,
                             'bulk': 'Bulk' if bulk else 'Non-Bulk',
+                            'forbidden': True if class_division == 'Forbidden' else False,
                             'text': subpart_tag.parent}
             return render_template('results.html', results=results_dict)
 
