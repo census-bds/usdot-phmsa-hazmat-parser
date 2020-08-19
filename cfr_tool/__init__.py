@@ -25,7 +25,7 @@ def create_app(test_config=None):
         pass
 
     # a simple page that says hello
-    @app.route('/cfr-tool')
+    @app.route('/cfr_tool')
     def cfr_tool():
         return 'Welcome to the cfr tool'
 
