@@ -25,7 +25,10 @@ def packaging():
             error = 'UNID is required.'
         else:
             return render_template(
-                'results.html', results=table.build_results(un_id, bulk, hazmat_db))
+                'results.html', results=table.build_results(
+                    un_id, 
+                    True if bulk == "on" else False,
+                    hazmat_db))
 
 
         flash(error)

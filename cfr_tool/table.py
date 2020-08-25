@@ -1,7 +1,30 @@
 import sqlite3
 from prettytable import from_db_cursor
 import re
-from . import soup
+from .soup import Soup
+
+# Maps hazmat table column numbers to column names
+INDEX_MAP = {
+    1: "hazmat_name",
+    2: "class_division",
+    3: "id_num",
+    4: "pg",
+    10: "rail_max_quant",
+    11: "aircraft_max_quant",
+    12: "stowage_location"
+}
+# Maps hazmat table column numbers containing nonunique values to new tables and column names
+NONUNIQUE_MAP = {
+    0: ("symbols", "symbol"),
+    5: ("label_codes", "label_code"),
+    6: ("special_provisions", "special_provision"),
+    7: ("packaging_exceptions", "exception"),
+    8: ("non_bulk_packaging", "requirement"),
+    9: ("bulk_packaging", "requirement"),
+    13: ("stowage_codes", "stowage_code")
+}
+
+CFR_SOUP = Soup()
 
 def create_nonunique_table(db, table_name, col_name):
     db.executescript("DROP TABLE IF EXISTS {};".format(table_name))
@@ -42,10 +65,10 @@ def load_ents(db, row, pk):
         for i, ent in enumerate(ents):
             if not ent or ent.text.strip() == '' or ent.text == "None":
                 continue
-            elif i in soup.NONUNIQUE_MAP.keys():
-                load_nonunique_table(db, pk, ent.text, *soup.NONUNIQUE_MAP[i])
+            elif i in NONUNIQUE_MAP.keys():
+                load_nonunique_table(db, pk, ent.text, *NONUNIQUE_MAP[i])
             else:
-                cols.append(soup.INDEX_MAP[i])
+                cols.append(INDEX_MAP[i])
                 vals.append(ent.text.strip().replace("'", "''"))
 
         col_names = "', '".join(cols)
@@ -81,13 +104,10 @@ def create_tables(db):
     )
     print("created hazmat table")
 
-    for table_name, column in soup.NONUNIQUE_MAP.values():
+    for table_name, column in NONUNIQUE_MAP.values():
         create_nonunique_table(db, table_name, column)
 
-    hazmat_table = list(
-        filter(lambda x: "Hazardous Materials Table" in x.find('ttitle').contents[0],
-            soup.SOUP.find_all('gpotable')))[0]
-    print("found the hazmat table")
+    hazmat_table = CFR_SOUP.get_hazmat_table()
 
     pk = 1
     for row in hazmat_table.find_all('row')[1:]:
@@ -109,10 +129,10 @@ def get_packaging_173(bulk, hazmat_id, db):
         WHERE hazmat_id = {}
         '''.format(
             table_name, hazmat_id))
-    subpart_string = requirement.fetchall()[0][0]
-    subpart_tag = soup.SOUP.find(
-        'sectno', text="§ 173.{}".format(subpart_string))
-    return subpart_tag.parent
+    subpart = requirement.fetchall()[0][0]
+    print("the subpart")
+    print(int(subpart))
+    return CFR_SOUP.get_subpart_text(173, int(subpart))
 
 def build_results(un_id, bulk, db):
     
