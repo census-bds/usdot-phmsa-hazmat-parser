@@ -95,5 +95,37 @@ def create_tables(db):
         load_ents(db, row, pk)
         pk += 1
         print("pk is ", pk)
-        
+
     db.commit()
+
+def get_packaging_173(bulk, hazmat_id, db):
+    if bulk:
+        table_name = "bulk_packaging"
+    else:
+        table_name = "non_bulk_packaging"
+    requirement = db.execute(
+        '''
+        SELECT requirement FROM {} 
+        WHERE hazmat_id = {}
+        '''.format(
+            table_name, hazmat_id))
+    subpart_string = requirement.fetchall()[0][0]
+    subpart_tag = soup.SOUP.find(
+        'sectno', text="§ 173.{}".format(subpart_string))
+    return subpart_tag.parent
+
+def build_results(un_id, bulk, db):
+    
+    hazmat_id_query = db.execute(
+        '''
+        SELECT hazmat_id, hazmat_name, class_division FROM hazmat_table
+        WHERE id_num = '{}';
+        '''.format(un_id))
+    #TO DO : right now we take the first one, need to address UNIDs with >1 row
+    hazmat_id, hazmat_name, class_division = hazmat_id_query.fetchone()
+    
+    return {'UNID': un_id,
+            'hazmat_name': hazmat_name,
+            'bulk': 'Bulk' if bulk else 'Non-Bulk',
+            'forbidden': True if class_division == 'Forbidden' else False,
+            'text': get_packaging_173(bulk, hazmat_id, db)}

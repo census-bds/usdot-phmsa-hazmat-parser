@@ -3,9 +3,7 @@ from flask import (
 )
 
 from . import db
-
 from . import table
-from . import soup
 
 bp = Blueprint('packaging', __name__)
 
@@ -25,36 +23,9 @@ def packaging():
 
         if not un_id:
             error = 'UNID is required.'
-
-        if error is None:
-            if bulk:
-                table_name = "bulk_packaging"
-            else:
-                table_name = "non_bulk_packaging"
-            hazmat_id_query = hazmat_db.execute(
-                '''
-                SELECT hazmat_id, hazmat_name, class_division FROM hazmat_table
-                WHERE id_num = '{}';
-                '''.format(un_id))
-            #TO DO : right now we take the first one, need to address UNIDs with >1 row
-            hazmat_id, hazmat_name, class_division = hazmat_id_query.fetchone()
-            print(class_division)
-            requirement = hazmat_db.execute(
-                '''
-                SELECT requirement FROM {} 
-                WHERE hazmat_id = {}
-                '''.format(
-                    table_name, hazmat_id))
-            subpart_string = requirement.fetchall()[0][0]
-            subpart_tag = soup.SOUP.find(
-                'sectno', text="§ 173.{}".format(subpart_string))
-            
-            results_dict = {'UNID': un_id,
-                            'hazmat_name': hazmat_name,
-                            'bulk': 'Bulk' if bulk else 'Non-Bulk',
-                            'forbidden': True if class_division == 'Forbidden' else False,
-                            'text': subpart_tag.parent}
-            return render_template('results.html', results=results_dict)
+        else:
+            return render_template(
+                'results.html', results=table.build_results(un_id, bulk, hazmat_db))
 
 
         flash(error)
