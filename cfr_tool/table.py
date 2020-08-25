@@ -56,3 +56,44 @@ def load_ents(db, row, pk):
         )
         db.commit()
         print("loaded ", col_names)
+
+def create_tables(db):
+
+    '''
+    if not os.path.isfile('hazmat-parser.sqlite'):
+        # comment out when running a flask app
+        
+        db = sqlite3.connect(
+            os.path.join(os.getcwd(), 'hazmat-parser.sqlite'),
+            detect_types=sqlite3.PARSE_DECLTYPES
+        )
+    '''
+    db.executescript("DROP TABLE IF EXISTS hazmat_table;")
+    db.executescript(
+        '''
+        CREATE TABLE hazmat_table (
+            hazmat_id integer not null primary key,
+            hazmat_name text, class_division text,
+            id_num text, pg text, rail_max_quant text,
+            aircraft_max_quant text, stowage_location text
+        );
+        '''
+    )
+    print("created hazmat table")
+
+    for table_name, column in soup.NONUNIQUE_MAP.values():
+        create_nonunique_table(db, table_name, column)
+
+    hazmat_table = list(
+        filter(lambda x: "Hazardous Materials Table" in x.find('ttitle').contents[0],
+            soup.SOUP.find_all('gpotable')))[0]
+    print("found the hazmat table")
+
+    pk = 1
+    for row in hazmat_table.find_all('row')[1:]:
+        # TO DO: check that data starts at row 1
+        load_ents(db, row, pk)
+        pk += 1
+        print("pk is ", pk)
+        
+    db.commit()

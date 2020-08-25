@@ -27,46 +27,7 @@ def close_db(e=None):
 def init_db():
     # uncomment when running a flask app
     db = get_db()
-    '''
-    if not os.path.isfile('hazmat-parser.sqlite'):
-        # comment out when running a flask app
-        
-        db = sqlite3.connect(
-            os.path.join(os.getcwd(), 'hazmat-parser.sqlite'),
-            detect_types=sqlite3.PARSE_DECLTYPES
-        )
-    '''
-    db.executescript("DROP TABLE IF EXISTS hazmat_table;")
-    db.executescript(
-        '''
-        CREATE TABLE hazmat_table (
-            hazmat_id integer not null primary key,
-            hazmat_name text, class_division text,
-            id_num text, pg text, rail_max_quant text,
-            aircraft_max_quant text, stowage_location text
-        );
-        '''
-    )
-    print("created hazmat table")
-
-    for table_name, column in soup.NONUNIQUE_MAP.values():
-        table.create_nonunique_table(db, table_name, column)
-
-    def find_hazmat_table(soup_table):
-        table_title = soup_table.find('ttitle')
-        return table_title and ("Hazardous Materials Table" in table_title.contents[0])
-
-    hazmat_table = list(
-        filter(find_hazmat_table, soup.SOUP.find_all('gpotable')))[0]
-    print("found the hazmat table")
-    pk = 1
-    
-    for row in hazmat_table.find_all('row')[1:]:
-        # TO DO: check that data starts at row 1
-        table.load_ents(db, row, pk)
-        pk += 1
-        print("pk is ", pk)
-    db.commit()
+    table.create_tables(db)
 
 
 @click.command('init-db')

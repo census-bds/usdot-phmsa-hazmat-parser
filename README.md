@@ -20,7 +20,7 @@ For Windows cmd:
 ```
 For Windows PowerShell
 ```
-> $env:FLASK_APP = "cfr-tool"
+> $env:FLASK_APP = "cfr_tool"
 > $env:FLASK_ENV = "development"
 > flask run
 ```
