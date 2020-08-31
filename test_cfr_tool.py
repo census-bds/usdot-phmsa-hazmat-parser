@@ -16,7 +16,7 @@ def app():
         'TESTING': True,
         'DATABASE': db_path,
     })
-
+    # TODO: figure out how to get this to yield a db cursor
     yield app
 
     os.close(db_fd)
@@ -49,6 +49,17 @@ def test_create_nonunique_tables(app):
         output = cur.fetchall()
         assert [tuple(output[0]), tuple(output[1])] == \
             [(0, 'hazmat_id', 'integer', 1, None, 0), (1, 'symbol', 'text', 0, None, 0)]
+
+def test_load_symbols_table(app):
+    with app.app_context():
+        test_db = db.get_db()
+        cur = test_db.cursor()
+        table.create_nonunique_table(cur, "symbols", "symbol")
+        table.load_nonunique_table(cur, 100, "A W", "symbols", "symbol")
+        cur.execute("SELECT * FROM symbols WHERE hazmat_id = 100;")
+        output = cur.fetchall()
+        assert [tuple(output[0]), tuple(output[1])] == \
+            [(100, 'A'), (100, 'W')]
 
 def test_hazmat_table_length():
     hazmat_table = TEST_SOUP.get_hazmat_table()
