@@ -9,14 +9,10 @@ class Soup:
         self.cfr = requests.get(self.url)
         self.parsed_soup = bs4.BeautifulSoup(self.cfr.text, 'lxml')
     
-    def get_hazmat_table(self):
-        def find_hazmat_table(soup_table):
-            table_title = soup_table.find('ttitle')
-            return table_title \
-                and ("Hazardous Materials Table" in table_title.contents[0])
-
-        return list(
-            filter(find_hazmat_table, self.parsed_soup.find_all('gpotable')))[0]
+    def find_table(self, table_title):
+        tables = self.parsed_soup.find_all('gpotable')
+        return [table for table in tables if table.find('ttitle') \
+            and table.find('ttitle').text == table_title][0]
     
     def get_subpart_text(self, part, subpart):
         subpart_tag = self.parsed_soup.find(

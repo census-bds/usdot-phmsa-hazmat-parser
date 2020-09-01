@@ -4,8 +4,8 @@ from flask import current_app, g
 from flask.cli import with_appcontext
 import os
 
-from . import table
-from . import soup
+from . import table, explosives
+from .soup import Soup
 
 def get_db():
     if 'db' not in g:
@@ -26,8 +26,17 @@ def close_db(e=None):
 
 def init_db():
     # uncomment when running a flask app
-    db = get_db()
-    table.create_tables(db)
+    print("initializing db")
+    db = get_db()   
+    cfr_soup = Soup()
+    print("created soup")
+    hazmat_table = table.HazmatTable(db, cfr_soup)
+    hazmat_table.create_load_hazmat_data()
+    print("loaded hazmat")
+    explosives_parser = explosives.Explosives(db, cfr_soup)
+    explosives_parser.create_load_explosives()
+    print("loaded explosives")
+    db.commit()
 
 
 @click.command('init-db')
