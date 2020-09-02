@@ -33,7 +33,7 @@ class Explosives:
         ''', entries)
         print("loaded explosives table")
 
-    def parse_load_packing_methods(self):
+    def create_packing_methods(self):
         self.db.executescript("DROP TABLE IF EXISTS packing_methods;")
         self.db.executescript('''
             CREATE TABLE packing_methods (
@@ -49,11 +49,15 @@ class Explosives:
                     REFERENCES explosives_table (packaging_instruction)
             );
         ''')
+        pass
+
+    def parse_load_packing_methods(self):
         packing_rows = self.soup.find_table("Table of Packing Methods").find_all('row')
         symbol = True
         full_data = []
         for row in packing_rows:
             ents = row.find_all('ent')
+            print(ents)
             if symbol:
                 #make sure there are three digits at the beginning
                 three_digits = re.compile("\d\d\d")
@@ -62,11 +66,12 @@ class Explosives:
                 while len(data) < 4:
                     data.append(None)
             else:
+                if (ents[0].text == "PARTICULAR PACKING REQUIREMENTS OR EXCEPTIONS:" or \
+                    ents[0].text == "Particular Packaging Requirements:") and \
+                    len(ents) == 1:
+                    print("successfully skipping this one")
+                    continue
                 for ent in ents:
-                    #skip the rows that just say "PARTICULAR PACKING REQUIREMENTS OR EXCEPTIONS:"
-                    if ent.text == "PARTICULAR PACKING REQUIREMENTS OR EXCEPTIONS:" and \
-                        len(ents) == 1:
-                        continue
                     data.append(ent.text)
                 while len(data) < 8:
                     data.append(None)
@@ -84,5 +89,6 @@ class Explosives:
                 outer_packagings_material
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ''', full_data)
+        pass
 
 
