@@ -52,6 +52,8 @@ class Explosives:
         pass
 
     def parse_load_packing_methods(self):
+        def clean_text(ent):
+            return ent.text.strip('\n').replace('\n', ' ')
         packing_rows = self.soup.find_table("Table of Packing Methods").find_all('row')
         symbol = True
         full_data = []
@@ -62,7 +64,7 @@ class Explosives:
                 #make sure there are three digits at the beginning
                 three_digits = re.compile("\d\d\d")
                 assert three_digits.match(ents[0].text)
-                data = [ent.text for ent in ents]
+                data = [clean_text(ent) for ent in ents]
                 while len(data) < 4:
                     data.append(None)
             else:
@@ -72,7 +74,7 @@ class Explosives:
                     print("successfully skipping this one")
                     continue
                 for ent in ents:
-                    data.append(ent.text)
+                    data.append(clean_text(ent))
                 while len(data) < 8:
                     data.append(None)
                 full_data.append(tuple(data))
