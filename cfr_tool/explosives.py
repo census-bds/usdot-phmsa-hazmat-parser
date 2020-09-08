@@ -1,4 +1,5 @@
 import re
+from . import clean_text as ct
 
 class Explosives:
     def __init__(self, db, soup):
@@ -51,9 +52,30 @@ class Explosives:
         ''')
         pass
 
+    def create_outer_packagings(self):
+        self.db.executescript("DROP TABLE IF EXISTS outer_packagings;")
+        self.db.executescript('''
+            CREATE TABLE outer_packagings (
+                packaging_instruction text,
+                packaging_code text,
+                FOREIGN KEY (packaging_instruction)
+                    REFERENCES explosives_table (packaging_instruction)
+            );
+        ''')
+
+    def load_outer_packagings(self, pi, codes):
+        data = [(pi, code) for code in codes]
+        self.db.executemany('''
+            INSERT INTO outer_packagings (
+                packaging_instruction,
+                packaging_code
+            ) VALUES (
+                ?, ?
+            )
+            ''', data)
+
     def parse_load_packing_methods(self):
-        def clean_text(ent):
-            return ent.text.strip('\n').replace('\n', ' ')
+        self.create_outer_packagings()
         packing_rows = self.soup.find_table("Table of Packing Methods").find_all('row')
         symbol = True
         full_data = []
@@ -64,7 +86,7 @@ class Explosives:
                 #make sure there are three digits at the beginning
                 three_digits = re.compile("\d\d\d")
                 assert three_digits.match(ents[0].text)
-                data = [clean_text(ent) for ent in ents]
+                data = [ct.clean_new_lines(ent) for ent in ents]
                 while len(data) < 4:
                     data.append(None)
             else:
@@ -74,9 +96,12 @@ class Explosives:
                     print("successfully skipping this one")
                     continue
                 for ent in ents:
-                    data.append(clean_text(ent))
+                    data.append(ct.clean_new_lines(ent))
                 while len(data) < 8:
                     data.append(None)
+                if data[7]:
+                    load_outer_packagings(data[0], ct.parse_packaging_codes(data[7]))
+                    #TO DO: clean and load packaging IDs in last column into a table of ID to material
                 full_data.append(tuple(data))
             symbol = not symbol
         self.db.executemany('''
@@ -91,6 +116,3 @@ class Explosives:
                 outer_packagings_material
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ''', full_data)
-        pass
-
-
