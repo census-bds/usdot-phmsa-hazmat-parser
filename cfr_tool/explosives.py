@@ -73,8 +73,9 @@ class Explosives:
             )
             ''', data)
 
+
     def parse_load_packing_methods(self):
-        self.create_outer_packagings()
+
         packing_rows = self.soup.find_table("Table of Packing Methods").find_all('row')
         symbol = True
         full_data = []
