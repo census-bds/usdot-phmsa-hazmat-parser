@@ -92,6 +92,7 @@ class HazmatTable:
         for table_name, column in self.nonunique_map.values():
             self.create_nonunique_table(table_name, column)
         hazmat_table = self.soup.find_table("§ 172.101 Hazardous Materials Table")
+        #TO DO: change this to be a single insert
         pk = 1
         for row in hazmat_table.find_all('row')[1:]:
             # TO DO: check that data starts at row 1

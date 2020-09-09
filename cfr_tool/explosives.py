@@ -1,5 +1,5 @@
 import re
-from . import clean_text as ct
+import clean_text as ct
 
 class Explosives:
     def __init__(self, db, soup):
@@ -20,7 +20,7 @@ class Explosives:
             )
         ''')
         explosives = self.soup.find_table("Explosives Table")
-        print("created explosives table")
+
         entries = []
         for row in explosives.find_all('row'):
             text = [ent.text for ent in row.find_all('ent')]
@@ -32,7 +32,6 @@ class Explosives:
             INSERT INTO explosives_table (id_num, packaging_instruction)
             VALUES (?, ?)
         ''', entries)
-        print("loaded explosives table")
 
     def create_packing_methods(self):
         self.db.executescript("DROP TABLE IF EXISTS packing_methods;")
@@ -100,8 +99,7 @@ class Explosives:
                 while len(data) < 8:
                     data.append(None)
                 if data[7]:
-                    load_outer_packagings(data[0], ct.parse_packaging_codes(data[7]))
-                    #TO DO: clean and load packaging IDs in last column into a table of ID to material
+                    self.load_outer_packagings(data[0], ct.parse_packaging_codes(data[7]))
                 full_data.append(tuple(data))
             symbol = not symbol
         self.db.executemany('''
