@@ -8,7 +8,8 @@ class Explosives:
 
     def create_load_explosives(self):
         self.parse_load_pis()
-
+        self.parse_load_packing_methods()
+    
     def parse_load_pis(self):
         self.db.executescript("DROP TABLE IF EXISTS explosives_table;")
         self.db.executescript('''
@@ -58,12 +59,40 @@ class Explosives:
                 packaging_instruction text,
                 packaging_code text,
                 FOREIGN KEY (packaging_instruction)
-                    REFERENCES explosives_table (packaging_instruction)
+                    REFERENCES explosives_table (packaging_instruction),
+                FOREIGN KEY (packaging_code)
+                    REFERENCES packagings (packaging_code)
+            );
+        ''')
+    
+    def create_packagings(self):
+        self.db.executescript('''
+            CREATE TABLE IF NOT EXISTS packagings (
+                packaging_code text,
+                packaging_name text
             );
         ''')
 
-    def load_outer_packagings(self, pi, codes):
-        data = [(pi, code) for code in codes]
+    def load_outer_packagings(self, pi, codes, names):
+        if len(codes) != len(names):
+            print("unequal length~!")
+            print(codes)
+            print(names)
+            print()
+        data = []
+        packaging_names = []
+        for i, code in enumerate(codes):
+            if type(code) == str:
+                data.append((pi, code))
+                packaging_names.append((code, names[i]))
+            elif type(code) == tuple:
+                data.append((pi, code[0]))
+                data.append((pi, code[1]))
+                packaging_names.append((code[0], names[i]))
+                packaging_names.append((code[1], names[i]))
+        print("outer packagings loading")
+        print(data)
+        print()
         self.db.executemany('''
             INSERT INTO outer_packagings (
                 packaging_instruction,
@@ -72,16 +101,25 @@ class Explosives:
                 ?, ?
             )
             ''', data)
-
+        print("packagings loading")
+        print(packaging_names)
+        self.db.executemany('''
+            INSERT INTO packagings (
+                packaging_code,
+                packaging_name
+            ) VALUES (
+                ?, ?
+            )
+            ''', packaging_names)
 
     def parse_load_packing_methods(self):
-
+        self.create_outer_packagings()
+        self.create_packagings()
         packing_rows = self.soup.find_table("Table of Packing Methods").find_all('row')
         symbol = True
         full_data = []
         for row in packing_rows:
             ents = row.find_all('ent')
-            print(ents)
             if symbol:
                 #make sure there are three digits at the beginning
                 three_digits = re.compile("\d\d\d")
@@ -100,7 +138,9 @@ class Explosives:
                 while len(data) < 8:
                     data.append(None)
                 if data[7]:
-                    self.load_outer_packagings(data[0], ct.parse_packaging_codes(data[7]))
+                    names = ct.parse_packaging_names(data[7])
+                    codes = ct.parse_packaging_codes(data[7])
+                    self.load_outer_packagings(data[0], codes, names)
                 full_data.append(tuple(data))
             symbol = not symbol
         self.db.executemany('''
