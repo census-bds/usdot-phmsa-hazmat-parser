@@ -69,30 +69,13 @@ class Explosives:
         self.db.executescript('''
             CREATE TABLE IF NOT EXISTS packagings (
                 packaging_code text,
-                packaging_name text
+                packaging_name text,
+                UNIQUE (packaging_code, packaging_name)
             );
         ''')
 
-    def load_outer_packagings(self, pi, codes, names):
-        if len(codes) != len(names):
-            print("unequal length~!")
-            print(codes)
-            print(names)
-            print()
-        data = []
-        packaging_names = []
-        for i, code in enumerate(codes):
-            if type(code) == str:
-                data.append((pi, code))
-                packaging_names.append((code, names[i]))
-            elif type(code) == tuple:
-                data.append((pi, code[0]))
-                data.append((pi, code[1]))
-                packaging_names.append((code[0], names[i]))
-                packaging_names.append((code[1], names[i]))
-        print("outer packagings loading")
-        print(data)
-        print()
+    def load_outer_packagings(self, pi, outer_packagings):
+        packaging_parsed = ct.parse_names_codes(outer_packagings)
         self.db.executemany('''
             INSERT INTO outer_packagings (
                 packaging_instruction,
@@ -100,17 +83,15 @@ class Explosives:
             ) VALUES (
                 ?, ?
             )
-            ''', data)
-        print("packagings loading")
-        print(packaging_names)
+            ''', [(pi, packaging[0]) for packaging in packaging_parsed])
         self.db.executemany('''
-            INSERT INTO packagings (
+            INSERT OR IGNORE INTO packagings (
                 packaging_code,
                 packaging_name
             ) VALUES (
                 ?, ?
             )
-            ''', packaging_names)
+            ''', packaging_parsed)
 
     def parse_load_packing_methods(self):
         self.create_outer_packagings()
@@ -138,9 +119,7 @@ class Explosives:
                 while len(data) < 8:
                     data.append(None)
                 if data[7]:
-                    names = ct.parse_packaging_names(data[7])
-                    codes = ct.parse_packaging_codes(data[7])
-                    self.load_outer_packagings(data[0], codes, names)
+                    self.load_outer_packagings(data[0], data[7])
                 full_data.append(tuple(data))
             symbol = not symbol
         self.db.executemany('''
