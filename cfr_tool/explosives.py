@@ -65,14 +65,6 @@ class Explosives:
             );
         ''')
     
-    def create_packagings(self):
-        self.db.executescript('''
-            CREATE TABLE IF NOT EXISTS packagings (
-                packaging_code text,
-                packaging_name text,
-                UNIQUE (packaging_code, packaging_name)
-            );
-        ''')
 
     def load_outer_packagings(self, pi, outer_packagings):
         packaging_parsed = ct.parse_names_codes(outer_packagings)
@@ -84,14 +76,6 @@ class Explosives:
                 ?, ?
             )
             ''', [(pi, packaging[0]) for packaging in packaging_parsed])
-        self.db.executemany('''
-            INSERT OR IGNORE INTO packagings (
-                packaging_code,
-                packaging_name
-            ) VALUES (
-                ?, ?
-            )
-            ''', packaging_parsed)
 
     def parse_load_packing_methods(self):
         self.create_outer_packagings()
