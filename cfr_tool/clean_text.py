@@ -7,6 +7,10 @@ Some utility functions for parsing and cleaning text.
 def clean_new_lines(ent):
     return ent.text.strip('\n').replace('\n', ' ')
 
+def parse_packaging_code(text):
+    pattern = re.compile("\d+[A-Z]+\d?")
+    return pattern.find(text)
+
 def parse_names_codes(text):
     pattern = re.compile(
         '((?<!\d)(?<=\s|^|.\s|.)[^\d\(\).]+\w+(?=[\s|-]\(\d+[A-Z]))|(?<=\(|\sor\s)(\d+[A-Z]+\d?(/\d)*)(?=\)|\sor\s)')
@@ -25,3 +29,21 @@ def parse_names_codes(text):
         if code and slashes == '':
             output.append((code, last_name))
     return output
+
+def parse_packaging_kind_material(texts):
+    output = {"packaging_kinds": [], "packaging_materials": []}
+    pattern_material = re.compile(
+        '((?<=\\“)[A-Z](?=\\”\\smeans\\s))|((?<=means\s).*(?=\.))')
+    pattern_kind = re.compile(
+        '((?<=\\“)\d(?=\\”\\smeans\\s))|((?<=means\s).*(?=\.))')
+    for text in texts:
+        matches = pattern_kind.findall(text)
+        if matches:
+            if matches[0][0]:
+                output["packaging_kinds"].append((matches[0][0], matches[1][1]))
+            else:
+                matches = pattern_material.findall(text)
+                output["packaging_materials"].append((matches[0][0], matches[1][1]))
+    return output
+
+        
