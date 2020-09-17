@@ -35,25 +35,7 @@ class PackagingStandards:
         ''')
     
 
-    def parse_kind_material(self):
-        '''
-        This grabs nonbulk kind and material codes. For IBCs, kind codes are in a badly
-        formatted table and material codes are the same. Need to write checks for this.
-        ''' 
-        self.create_kinds_table()
-        self.create_materials_table()
-        id_codes = self.soup.get_part_tag(178, 502)
-        ps = [p.text for p in id_codes.find_all('p')]
-        parsed_codes = ct.parse_packaging_kind_material(ps) #MIGHT MOVE THIS FUNCTION HERE
-        for table, values in parsed_codes.items():
-            self.db.executemany('''
-                INSERT INTO {} (
-                    id_code,
-                    meaning
-                ) VALUES (
-                    ?, ?
-                )
-            '''.format(table), values)
+    
 
     def create_categories_table(self):
         self.db.execute('''

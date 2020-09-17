@@ -7,9 +7,6 @@ Some utility functions for parsing and cleaning text.
 def clean_new_lines(ent):
     return ent.text.strip('\n').replace('\n', ' ')
 
-def parse_packaging_code(text):
-    pattern = re.compile("\d+[A-Z]+\d?")
-    return pattern.find(text)
 
 def parse_names_codes(text):
     pattern = re.compile(
