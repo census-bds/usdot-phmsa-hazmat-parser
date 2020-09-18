@@ -32,10 +32,7 @@ class PackagingStandards:
                 id_code integer,
                 meaning text
             );
-        ''')
-    
-
-    
+        ''') 
 
     def create_categories_table(self):
         self.db.execute('''

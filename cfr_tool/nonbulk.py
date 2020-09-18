@@ -7,17 +7,15 @@ class NonBulk(PackagingStandards):
         self.categories = self.get_categories()
 
     def parse_kind_material(self):
-        '''
-        This grabs nonbulk kind and material codes. For IBCs, kind codes are in a badly
-        formatted table and material codes are the same. Need to write checks for this.
-        ''' 
         self.create_kinds_table()
         self.create_materials_table()
         id_codes = self.soup.get_part_tag(178, 502)
         texts = [p.text for p in id_codes.find_all('p')]
         parsed_codes = {"packaging_kinds": [], "packaging_materials": []}
+        # Looks for the 'B' and 'aluminum within '(ii) “B” means aluminum.'
         pattern_material = re.compile(
             '((?<=\\“)[A-Z](?=\\”\\smeans\\s))|((?<=means\s).*(?=\.))')
+        # Looks for the '1' and 'drum' within '(i) “1” means a drum.'
         pattern_kind = re.compile(
             '((?<=\\“)\d(?=\\”\\smeans\\s))|((?<=means\s).*(?=\.))')
         for text in texts:
@@ -40,11 +38,12 @@ class NonBulk(PackagingStandards):
             '''.format(table), values)
 
     def get_categories(self):
+        #Find the code pattern which is digits, letters, digits
         code_pattern = re.compile("(\d+)([A-Z]+)(\d+)")
+        #Find the category name which is some text followed by "for a(n) ", preceded by ; or .
         category_pattern = re.compile("(?<=for\sa?n?\s?)(.*)(?=[;\.])")
         categories_data = []
         for subpart in range(504, 524):
-            print(subpart)
             subpart_tag = self.soup.get_part_tag(178, subpart)
             ps = [p.text for p in subpart_tag.find_all('p')]
             id_codes_text = [(idx, text) for idx, text in enumerate(ps) if \
@@ -57,8 +56,6 @@ class NonBulk(PackagingStandards):
                 for text in category_code_text:
                     matched = code_pattern.findall(text)
                     if matched:
-                        print(text)
-                        print()
                         kind, material, category_code = code_pattern.findall(text)[0]
                         category_desc = category_pattern.search(text).group()
                         categories_data.append((kind + material + category_code,
