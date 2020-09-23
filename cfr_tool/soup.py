@@ -3,11 +3,14 @@ import bs4
 import xml.etree.ElementTree as ET
 
 class Soup:
-    def __init__(self):
+    def __init__(self, volume):
     # govinfo xml url from which to parse the hazmat table
-        self.url = 'https://www.govinfo.gov/content/pkg/CFR-2019-title49-vol2/xml/CFR-2019-title49-vol2.xml'
+        self.url = 'https://www.govinfo.gov/content/pkg/CFR-2019-title49-vol{}/xml/CFR-2019-title49-vol{}.xml'.format(
+            str(volume), str(volume)
+        )
         self.cfr = requests.get(self.url)
         self.parsed_soup = bs4.BeautifulSoup(self.cfr.text, 'lxml')
+        self.volume = volume
     
     def find_table(self, table_title):
         tables = self.parsed_soup.find_all('gpotable')
