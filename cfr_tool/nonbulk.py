@@ -8,8 +8,8 @@ class NonBulk(PackagingStandards):
 
     def parse_kind_material(self):
         self.create_kinds_table()
-        self.create_materials_table()
-        id_codes = self.soup.get_part_tag(178, 502)
+        self==.create_materials_table()
+        id_codes = self.soup.get_subpart_text(178, 502)
         texts = [p.text for p in id_codes.find_all('p')]
         parsed_codes = {"packaging_kinds": [], "packaging_materials": []}
         # Looks for the 'B' and 'aluminum within '(ii) “B” means aluminum.'
@@ -44,7 +44,7 @@ class NonBulk(PackagingStandards):
         category_pattern = re.compile("(?<=for\sa?n?\s?)(.*)(?=[;\.])")
         categories_data = []
         for subpart in range(504, 524):
-            subpart_tag = self.soup.get_part_tag(178, subpart)
+            subpart_tag = self.soup.get_subpart_text(178, subpart)
             ps = [p.text for p in subpart_tag.find_all('p')]
             id_codes_text = [(idx, text) for idx, text in enumerate(ps) if \
                 " identification codes for " in text]
