@@ -1,3 +1,4 @@
+import logging
 import os
 
 import requests
@@ -6,22 +7,27 @@ import xml.etree.ElementTree as ET
 
 class Soup:
     CACHE_DIRECTORY = "cfr_cache"
+
     def __init__(self, volume):
-        # govinfo xml url from which to parse the hazmat table
-        self.cfr = 
+        if not os.path.exists(self.CACHE_DIRECTORY):
+            os.mkdir(self.CACHE_DIRECTORY)
+        self.cfr = self.get_cfr_xml(volume)
         self.parsed_soup = bs4.BeautifulSoup(self.cfr, 'lxml')
         self.volume = volume
 
 
     def get_cfr_xml(self, volume):
+        # govinfo xml url from which to parse the hazmat table
         self.url = 'https://www.govinfo.gov/content/pkg/CFR-2019-title49-vol{}/xml/CFR-2019-title49-vol{}.xml'.format(
             str(volume), str(volume)
         )
        	self.cache_path = os.path.join(self.CACHE_DIRECTORY, self.url.split("/")[-1] )
         if os.path.exists(self.cache_path):
+            logging.info("using cached CFR volume {}".format(volume))
             with open(self.cache_path) as cache_xml:
                 xml = cache_xml.read()
         else:
+            logging.info("downloading fresh CFR volume {}".format(volume))
             xml = requests.get(self.url).text
             with open(self.cache_path, "w+") as cache_xml:
                 cache_xml.write(xml)
