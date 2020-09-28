@@ -21,7 +21,7 @@ class Soup:
         self.url = 'https://www.govinfo.gov/content/pkg/CFR-2019-title49-vol{}/xml/CFR-2019-title49-vol{}.xml'.format(
             str(volume), str(volume)
         )
-       	self.cache_path = os.path.join(self.CACHE_DIRECTORY, self.url.split("/")[-1] )
+        self.cache_path = os.path.join(self.CACHE_DIRECTORY, self.url.split("/")[-1] )
         if os.path.exists(self.cache_path):
             logging.info("using cached CFR volume {}".format(volume))
             with open(self.cache_path) as cache_xml:
