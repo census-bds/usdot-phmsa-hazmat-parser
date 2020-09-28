@@ -1,14 +1,14 @@
 import regex as re
-from packaging_standards import PackagingStandards 
+from . import packaging_standards as ps 
 
-class NonBulk(PackagingStandards):
+class NonBulk(ps.PackagingStandards):
     def __init__(self, db, soup):
-        PackagingStandards.__init__(self, db, soup)
+        ps.PackagingStandards.__init__(self, db, soup)
         self.categories = self.get_categories()
 
     def parse_kind_material(self):
         self.create_kinds_table()
-        self==.create_materials_table()
+        self.create_materials_table()
         id_codes = self.soup.get_subpart_text(178, 502)
         texts = [p.text for p in id_codes.find_all('p')]
         parsed_codes = {"packaging_kinds": [], "packaging_materials": []}
