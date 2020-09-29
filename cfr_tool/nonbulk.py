@@ -38,4 +38,3 @@ class NonBulk(ps.PackagingStandards):
                     ?, ?
                 )
             '''.format(table), values)
-jkkk
