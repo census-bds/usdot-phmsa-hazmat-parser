@@ -1,5 +1,8 @@
+import networkx as nx
 import regex as re
+
 from . import clean_text as ct
+
 
 
 '''
@@ -9,6 +12,8 @@ Convert specific subparts to be children of this class.
 '''
 
 class PackagingStandards:
+    PART = 178 
+
     def __init__(self, db, soup):
         self.db = db
         self.soup = self.volume_check(soup)
@@ -66,35 +71,23 @@ class PackagingStandards:
             )
         ''', self.categories)
 
-    def get_categories(self, start, end):
+    def get_categories(self, start, end, definition_paragraph='a'):
         #Find the code pattern which is digits, letters, digits
-        code_pattern = re.compile("(\d+)([A-Z]+)(\d+)")
+        code_pattern = re.compile("(\d+[A-Z]+\d*)")
         #Find the category name which is some text followed by "for a(n) ", preceded by ; or .
         category_pattern = re.compile("(?<=for\sa?n?\s?)(.*)(?=[;\.])")
         categories_data = []
-        for subpart in range(start, end):
-            subpart_tag = self.soup.get_subpart_text(178, subpart)
-            ps = [p.text for p in subpart_tag.find_all('p')]
-            id_codes_text = [(idx, text) for idx, text in enumerate(ps) if \
-                " identification codes for " in text]
-            if len(id_codes_text) > 0:
-                start_idx = id_codes_text[0][0]
-                end_idx = [(idx, text) for idx, text in enumerate(ps) if \
-                    "Construction requirements for " in text][0][0]
-                category_code_text = ps[start_idx: end_idx]
-                for text in category_code_text:
-                    matched = code_pattern.findall(text)
-                    if matched:
-                        kind, material, category_code = code_pattern.findall(text)[0]
-                        category_desc = category_pattern.search(text).group()
-                        categories_data.append((kind + material + category_code,
-                                                int(kind),
-                                                material,
-                                                int(category_code),
-                                                category_desc))
+        for subpart in range(start, end + 1):
+            subpart_tag = self.soup.get_subpart_text(self.PART, subpart)
+            basic_type = subpart_tag.find("subject").text.split("for")[-1][:-1].strip()
+            paragraphs = self.soup.get_subpart_paragraphs(self.PART, subpart)
+            definitions = nx.subgraph(paragraphs, paragraphs[definition_paragraph])
+            paragraphs = [p.text for d, p in definitions.nodes().data('paragraph')]
+            codes = [code_pattern.findall(p) for p in paragraphs] 
+            # TODO: remove stopwords?
+            descs = [p.split(", ".join(c))[-1] for p, c in zip(paragraphs, codes)]
+            types = [basic_type] *  len(codes)
+            categories_data.append(tuple(zip(codes, descs, types)))
         return categories_data
-
-
-            
 
 
