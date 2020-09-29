@@ -73,7 +73,8 @@ class Soup:
         # part 178 subpart 500 paragraph a subparagraph 1
         # sub-sub paragraph i sub-sub-sub paragraph A
         # i.e. 178.500 (a)(1)(i)(A)
-        letter_pattern = re.compile(r'\(([a-z])\)')
+
+        letter_pattern = re.compile(r'\((?=[a-z])([^i])\)') #all chars except i
         number_pattern = re.compile(r'\(([0-9]+)\)')
         numeral_pattern = re.compile(r'\(([ivx]+)\)') # this is horrible
         uppercase_letter_pattern = re.compile(r'\(([A-Z])\)')
