@@ -8,7 +8,7 @@ Run flask in development mode with FLASK_APP=cfr-tool.
 <br>
 For Linux and Mac:
 ```
-$ export FLASK_APP=cfr-tool
+$ export FLASK_APP=cfr_tool
 $ export FLASK_ENV=development
 $ flask run
 ```

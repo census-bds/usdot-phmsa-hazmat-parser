@@ -1,5 +1,8 @@
+import networkx as nx
 import regex as re
-import clean_text as ct
+
+from . import clean_text as ct
+
 
 
 '''
@@ -9,6 +12,8 @@ Convert specific subparts to be children of this class.
 '''
 
 class PackagingStandards:
+    PART = 178 
+
     def __init__(self, db, soup):
         self.db = db
         self.soup = self.volume_check(soup)
@@ -66,8 +71,23 @@ class PackagingStandards:
             )
         ''', self.categories)
 
-
-
-            
+    def get_categories(self, start, end, definition_paragraph='a'):
+        #Find the code pattern which is digits, letters, digits
+        code_pattern = re.compile("(\d+[A-Z]+\d*)")
+        #Find the category name which is some text followed by "for a(n) ", preceded by ; or .
+        category_pattern = re.compile("(?<=for\sa?n?\s?)(.*)(?=[;\.])")
+        categories_data = []
+        for subpart in range(start, end + 1):
+            subpart_tag = self.soup.get_subpart_text(self.PART, subpart)
+            basic_type = subpart_tag.find("subject").text.split("for")[-1][:-1].strip()
+            paragraphs = self.soup.get_subpart_paragraphs(self.PART, subpart)
+            definitions = nx.subgraph(paragraphs, paragraphs[definition_paragraph])
+            paragraphs = [p.text for d, p in definitions.nodes().data('paragraph')]
+            codes = [code_pattern.findall(p) for p in paragraphs] 
+            # TODO: remove stopwords?
+            descs = [p.split(", ".join(c))[-1] for p, c in zip(paragraphs, codes)]
+            types = [basic_type] *  len(codes)
+            categories_data.append(tuple(zip(codes, descs, types)))
+        return categories_data
 
 

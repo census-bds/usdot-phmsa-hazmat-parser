@@ -9,6 +9,7 @@ def clean_new_lines(ent):
 
 
 def parse_names_codes(text):
+    #This regex finds 3 groups: the description/name of the packaging, the code, and any slashes after the code (i.e. 5H1/2/3)
     pattern = re.compile(
         '((?<!\d)(?<=\s|^|.\s|.)[^\d\(\).]+\w+(?=[\s|-]\(\d+[A-Z]))|(?<=\(|\sor\s)(\d+[A-Z]+\d?(/\d)*)(?=\)|\sor\s)')
     results = pattern.findall(text)

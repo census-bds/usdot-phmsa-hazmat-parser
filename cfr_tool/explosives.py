@@ -96,7 +96,6 @@ class Explosives:
                 if (ents[0].text == "PARTICULAR PACKING REQUIREMENTS OR EXCEPTIONS:" or \
                     ents[0].text == "Particular Packaging Requirements:") and \
                     len(ents) == 1:
-                    print("successfully skipping this one")
                     continue
                 for ent in ents:
                     data.append(ct.clean_new_lines(ent))

@@ -1,21 +1,26 @@
 import sqlite3
 import click
-from flask import current_app, g
+from flask import Flask, current_app, g, has_app_context
 from flask.cli import with_appcontext
 import os
+import __init__
 
-from . import table, explosives
+from . import table, explosives, nonbulk
 from .soup import Soup
 
 def get_db():
-    if 'db' not in g:
-        g.db = sqlite3.connect(
-            current_app.config['DATABASE'],
-            detect_types=sqlite3.PARSE_DECLTYPES
-        )
-        g.db.row_factory = sqlite3.Row
+    if has_app_context():
+        if 'db' not in g:
+            g.db = sqlite3.connect(
+                current_app.config['DATABASE'],
+                detect_types=sqlite3.PARSE_DECLTYPES
+            )
+            g.db.row_factory = sqlite3.Row
 
-    return g.db
+        return g.db
+    else:
+        db = sqlite3.connect('/phmsa/hazmat-parser/instance/hazmat-parser.sqlite')
+        return db
 
 
 def close_db(e=None):
@@ -25,18 +30,26 @@ def close_db(e=None):
         db.close()
 
 def init_db():
-    # uncomment when running a flask app
     print("initializing db")
-    db = get_db()   
-    cfr_soup = Soup()
-    print("created soup")
-    hazmat_table = table.HazmatTable(db, cfr_soup)
+    db = get_db()
+    
+    soup_2 = Soup(2)
+    hazmat_table = table.HazmatTable(db, soup_2)
     hazmat_table.create_load_hazmat_data()
     print("loaded hazmat")
-    explosives_parser = explosives.Explosives(db, cfr_soup)
+    explosives_parser = explosives.Explosives(db, soup_2)
     explosives_parser.create_load_explosives()
     print("loaded explosives")
+    
+    nb = nonbulk.NonBulk(db, Soup(3))
+    print('made soup')
+    nb.parse_kind_material()
+    print('parsed kind material')
+    nb.load_packaging_categories()
+    print('loaded categories')
     db.commit()
+
+
 
 
 @click.command('init-db')

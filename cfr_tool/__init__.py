@@ -1,6 +1,8 @@
 import os
 
 from flask import Flask
+import sqlite3
+from . import soup
 
 
 def create_app(test_config=None):
@@ -37,3 +39,12 @@ def create_app(test_config=None):
     app.add_url_rule('/', endpoint='packaging')
 
     return app
+
+
+def debug_harness(db_name = "instance/hazmat-parser.sqlite"):
+    from importlib import reload
+    reload(soup)
+    s2 = soup.Soup(volume=2)
+    s3 = soup.Soup(volume=3)
+    db = sqlite3.connect(db_name)
+    return s2, s3, db
