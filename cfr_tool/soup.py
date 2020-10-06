@@ -32,7 +32,7 @@ class Soup:
         else:
             logging.info("downloading fresh CFR volume {}".format(volume))
             xml = requests.get(self.url).text
-            with open(self.cache_path, "w+") as cache_xml:
+            with open(self.cache_path, "w+", encoding="utf-8") as cache_xml:
                 cache_xml.write(xml)
  
         return xml
