@@ -27,7 +27,7 @@ class Soup:
         self.cache_path = os.path.join(self.CACHE_DIRECTORY, self.url.split("/")[-1] )
         if os.path.exists(self.cache_path):
             logging.info("using cached CFR volume {}".format(volume))
-            with open(self.cache_path) as cache_xml:
+            with open(self.cache_path, encoding="utf-8") as cache_xml:
                 xml = cache_xml.read()
         else:
             logging.info("downloading fresh CFR volume {}".format(volume))
