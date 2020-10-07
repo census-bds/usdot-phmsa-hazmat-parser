@@ -53,10 +53,11 @@ class Soup:
         returns: a networkx graph object of the paragraphs of this subpart
         """
         subpart = self.get_subpart_text(part, subpart)
-        paragraphs = subpart.find_all("p")
+        paragraphs = subpart.find_all(["p", "fp"])
         indexed = list(self.gen_paragraph_tree(paragraphs))
         ret_tree = nx.Graph()
         for ix, paragraph in indexed:
+            print(ix, paragraph)
             canonical = ".".join(i for i in ix if i)
             parent = ".".join(canonical.split(".")[:-1])
             ret_tree.add_node(canonical, paragraph=paragraph)
@@ -80,18 +81,42 @@ class Soup:
         uppercase_letter_pattern = re.compile(r'\(([A-Z])\)')
 
         patterns = (letter_pattern, number_pattern, numeral_pattern, uppercase_letter_pattern)
+        start_chars = {letter_pattern: 'a',
+                       number_pattern: '1',
+                       numeral_pattern: 'i',
+                       uppercase_letter_pattern: 'A'}
         # letter, number, numeral, uppercase
         indices = [None, None, None, None]
         def _reset_indices_after(ix):
             for i in range(ix + 1, len(indices)):
                 indices[i] = None
-
+        prior_match_ix = None
         for paragraph in paragraphs:
+            print(paragraph)
             beginning = paragraph.text.strip()[:6]
+            current_match_ix = None
             for ix, pattern in enumerate(patterns):
                 match = pattern.findall(beginning)
                 if match:
+                    print('found a match!')
                     assert len(match) == 1
                     indices[ix] = match[0]
+                    current_match_ix = ix
+                    prior_match_ix = current_match_ix
+                    no_prior_match = False
                     _reset_indices_after(ix)
                     yield tuple(indices), paragraph
+            if no_prior_match and current_match_ix == None:
+                current_match_ix = prior_match_ix
+                prior_character = chr(ord(prior_character) + 1)
+                # TO DO: DEAL WITH DOUBLE DIGIT NUMBERS AND INCREMENTING ROMAN NUMERALS
+            else:
+                current_match_ix = prior_match_ix + 1
+                no_prior_match = True
+                prior_match_ix = current_match_ix
+                prior_character = start_chars[patterns[current_match_ix]]
+            indices[current_match_ix] = prior_character
+            _reset_indices_after(ix)
+            yield tuple(indices), paragraph
+
+            
