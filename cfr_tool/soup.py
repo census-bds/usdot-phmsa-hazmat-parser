@@ -57,7 +57,6 @@ class Soup:
         indexed = list(self.gen_paragraph_tree(paragraphs))
         ret_tree = nx.Graph()
         for ix, paragraph in indexed:
-            print(ix, paragraph)
             canonical = ".".join(i for i in ix if i)
             parent = ".".join(canonical.split(".")[:-1])
             ret_tree.add_node(canonical, paragraph=paragraph)
@@ -81,6 +80,7 @@ class Soup:
         uppercase_letter_pattern = re.compile(r'\(([A-Z])\)')
 
         patterns = (letter_pattern, number_pattern, numeral_pattern, uppercase_letter_pattern)
+        #TO DO: Deal with new <fp> tags that come after the uppercase letter pattern
         start_chars = {letter_pattern: 'a',
                        number_pattern: '1',
                        numeral_pattern: 'i',
@@ -98,7 +98,7 @@ class Soup:
             for ix, pattern in enumerate(patterns):
                 match = pattern.findall(beginning)
                 if match:
-                    print('found a match!')
+                    print("this paragraph found match")
                     assert len(match) == 1
                     indices[ix] = match[0]
                     current_match_ix = ix
@@ -106,6 +106,8 @@ class Soup:
                     no_prior_match = False
                     _reset_indices_after(ix)
                     yield tuple(indices), paragraph
+            if current_match_ix:
+                continue
             if no_prior_match and current_match_ix == None:
                 current_match_ix = prior_match_ix
                 try:
