@@ -108,8 +108,11 @@ class Soup:
                     yield tuple(indices), paragraph
             if no_prior_match and current_match_ix == None:
                 current_match_ix = prior_match_ix
-                prior_character = chr(ord(prior_character) + 1)
-                # TO DO: DEAL WITH DOUBLE DIGIT NUMBERS AND INCREMENTING ROMAN NUMERALS
+                try:
+                    prior_character = str(int(prior_character) + 1)
+                except ValueError:
+                    prior_character = chr(ord(prior_character) + 1)
+                # TO DO: DEAL WITH INCREMENTING ROMAN NUMERALS
             else:
                 current_match_ix = prior_match_ix + 1
                 no_prior_match = True
