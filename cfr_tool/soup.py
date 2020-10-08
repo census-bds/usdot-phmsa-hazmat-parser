@@ -115,7 +115,7 @@ class Soup:
             else:
                 #TO DO: Deal with new <fp> tags that come after the uppercase letter pattern.
                 # For now, we go back to the letter pattern.
-                current_match_ix = prior_match_ix + 1 if prior_match_ix <3 else 0
+                current_match_ix = prior_match_ix + 1 if prior_match_ix < 3 else 0
                 no_prior_match = True
                 prior_match_ix = current_match_ix
                 prior_character = start_chars[patterns[current_match_ix]]

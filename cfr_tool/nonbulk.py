@@ -1,7 +1,7 @@
 import regex as re
 from . import packaging_standards as ps 
 
-class NonBulk(ps.PackagingStandards):
+class NonBulk(ps.PackagingCodes):
     START = 504
     END = 523
     def __init__(self, db, soup):
