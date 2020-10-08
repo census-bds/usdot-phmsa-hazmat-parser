@@ -80,7 +80,6 @@ class Soup:
         uppercase_letter_pattern = re.compile(r'\(([A-Z])\)')
 
         patterns = (letter_pattern, number_pattern, numeral_pattern, uppercase_letter_pattern)
-        #TO DO: Deal with new <fp> tags that come after the uppercase letter pattern
         start_chars = {letter_pattern: 'a',
                        number_pattern: '1',
                        numeral_pattern: 'i',
@@ -92,13 +91,11 @@ class Soup:
                 indices[i] = None
         prior_match_ix = None
         for paragraph in paragraphs:
-            print(paragraph)
             beginning = paragraph.text.strip()[:6]
             current_match_ix = None
             for ix, pattern in enumerate(patterns):
                 match = pattern.findall(beginning)
                 if match:
-                    print("this paragraph found match")
                     assert len(match) == 1
                     indices[ix] = match[0]
                     current_match_ix = ix
@@ -114,9 +111,11 @@ class Soup:
                     prior_character = str(int(prior_character) + 1)
                 except ValueError:
                     prior_character = chr(ord(prior_character) + 1)
-                # TO DO: DEAL WITH INCREMENTING ROMAN NUMERALS
+                # TO DO: DEAL WITH INCREMENTING ROMAN NUMERALS.
             else:
-                current_match_ix = prior_match_ix + 1
+                #TO DO: Deal with new <fp> tags that come after the uppercase letter pattern.
+                # For now, we go back to the letter pattern.
+                current_match_ix = prior_match_ix + 1 if prior_match_ix <3 else 0
                 no_prior_match = True
                 prior_match_ix = current_match_ix
                 prior_character = start_chars[patterns[current_match_ix]]
