@@ -4,16 +4,6 @@ import re
 
 class HazmatTable:
     def __init__(self, db, soup):
-        # Maps hazmat table column numbers to column names
-        self.index_map = {
-            1: "hazmat_name",
-            2: "class_division",
-            3: "id_num",
-            4: "pg",
-            10: "rail_max_quant",
-            11: "aircraft_max_quant",
-            12: "stowage_location"
-        }
         # Maps hazmat table column numbers containing nonunique values to new tables and column names
         self.nonunique_map = {
             0: ("symbols", "symbol"),
@@ -55,50 +45,62 @@ class HazmatTable:
             entries)
 
 
-    def load_ents(self, row, pk):
-        ents = row.find_all('ent')
-        if ents:
-            cols = []
-            vals = []
-            for i, ent in enumerate(ents):
-                if not ent or ent.text.strip() == '' or ent.text == "None":
-                    continue
-                elif i in self.nonunique_map.keys():
-                    self.load_nonunique_table(pk, ent.text, *self.nonunique_map[i])
-                else:
-                    cols.append(self.index_map[i])
-                    vals.append(ent.text.strip().replace("'", "''"))
-
-            col_names = "', '".join(cols)
-            val_names = str(pk) + ", '" + "', '".join(vals)
-            self.db.executescript('''
-                INSERT INTO 'hazmat_table' ('hazmat_id', '{}') VALUES ({}')
-                '''.format(col_names, val_names)
-            )
+    def create_hazmat_entries(self):
+        hazmat_tables = self.soup.find_table("§ 172.101 Hazardous Materials Table")
+        pk = 1
+        entries = []
+        rows = hazmat_tables.find_all('row')[1:]
+        #Checking that first row is 'Accellerene'
+        assert rows[0].find_all('ent')[1].text.strip() == \
+            'Accellerene, see p-Nitrosodimethylaniline'
+        for row in rows:
+            ents = row.find_all('ent')
+            for ent in ents:   
+                if ent:
+                    vals = [pk]
+                    for i, ent in enumerate(ents):                       
+                        if i in self.nonunique_map.keys():
+                            self.load_nonunique_table(pk, ent.text, *self.nonunique_map[i])
+                        elif not ent or ent.text.strip() == '' or ent.text == "None":
+                            vals.append('')
+                        else:
+                            vals.append(ent.text.strip().replace("'", "''"))
+                    vals = (vals + [None] * 7)[:8]
+            assert len(vals) == 8
+            entries.append(tuple(vals))
+            pk += 1
+        return entries
 
     def create_load_hazmat_data(self):
         self.db.executescript("DROP TABLE IF EXISTS hazmat_table;")
+        for table_name, column in self.nonunique_map.values():
+            self.create_nonunique_table(table_name, column)
         self.db.executescript(
             '''
             CREATE TABLE hazmat_table (
                 hazmat_id integer not null primary key,
                 hazmat_name text, class_division text,
-                id_num text, pg text, rail_max_quant text,
+                unna_code text, pg text, rail_max_quant text,
                 aircraft_max_quant text, stowage_location text
             );
             '''
         )
-        print("created hazmat table")
-        for table_name, column in self.nonunique_map.values():
-            self.create_nonunique_table(table_name, column)
-        hazmat_table = self.soup.find_table("§ 172.101 Hazardous Materials Table")
-        #TO DO: change this to be a single insert
-        pk = 1
-        for row in hazmat_table.find_all('row')[1:]:
-            # TO DO: check that data starts at row 1
-            self.load_ents(row, pk)
-            pk += 1
-            print("loaded " + str(pk) + " to hazmat table")
+        self.db.executemany(
+            '''
+            INSERT INTO 'hazmat_table' (
+                'hazmat_id',
+                'hazmat_name',
+                'class_division',
+                'unna_code',
+                'pg',
+                'rail_max_quant',
+                'aircraft_max_quant',
+                'stowage_location'
+                )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', self.create_hazmat_entries()
+        )
+            
 
     def get_packaging_173(self, bulk, hazmat_id):
         if bulk:
