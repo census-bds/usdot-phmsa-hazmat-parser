@@ -1,11 +1,11 @@
 import regex as re
-from . import packaging_standards as ps 
+import packaging_codes as pc
 
-class NonBulk(ps.PackagingCodes):
+class NonBulk(pc.PackagingCodes):
     START = 504
     END = 523
     def __init__(self, db, soup):
-        ps.PackagingStandards.__init__(self, db, soup)
+        pc.PackagingStandards.__init__(self, db, soup)
         self.categories = self.get_categories(self.START, self.END)
 
     def parse_kind_material(self):

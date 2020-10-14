@@ -4,9 +4,11 @@ from flask import Flask, current_app, g, has_app_context
 from flask.cli import with_appcontext
 import os
 import __init__
-
+'''
 from . import table, explosives, nonbulk
 from .soup import Soup
+'''
+import table, explosives, nonbulk, soup
 
 def get_db():
     if has_app_context():
@@ -33,7 +35,7 @@ def init_db():
     print("initializing db")
     db = get_db()
     
-    soup_2 = Soup(2)
+    soup_2 = soup.Soup(2)
     hazmat_table = table.HazmatTable(db, soup_2)
     hazmat_table.create_load_hazmat_data()
     print("loaded hazmat")
@@ -41,7 +43,7 @@ def init_db():
     explosives_parser.create_load_explosives()
     print("loaded explosives")
     
-    nb = nonbulk.NonBulk(db, Soup(3))
+    nb = nonbulk.NonBulk(db, soup.Soup(3))
     print('made soup')
     nb.parse_kind_material()
     print('parsed kind material')

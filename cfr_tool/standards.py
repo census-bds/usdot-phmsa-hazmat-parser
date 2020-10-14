@@ -2,12 +2,11 @@ from .packaging_codes import PackagingCodes
 from .soup import Soup
 
 class Standards(PackagingCodes):
-    PART = 178
-    START = 500
-    END = 523
+
     def __init__(self, db, soup):
         PackagingCodes.__init__(self, db, soup)
         self.code_descriptions = self.get_codes_descriptions(self.START, self.END)
+        self.PART = 178
 
     
     def create_kinds_table(self):
