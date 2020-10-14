@@ -46,6 +46,11 @@ class HazmatTable:
 
 
     def create_hazmat_entries(self):
+        '''
+        This loops through the hazmat table to create entries for insertion and
+        simultaneously calls 'load_nonunique_table' to insert values into those tables
+        while parsing.
+        '''
         hazmat_tables = self.soup.find_table("§ 172.101 Hazardous Materials Table")
         pk = 1
         entries = []
@@ -55,17 +60,36 @@ class HazmatTable:
             'Accellerene, see p-Nitrosodimethylaniline'
         for row in rows:
             ents = row.find_all('ent')
-            for ent in ents:   
-                if ent:
-                    vals = [pk]
-                    for i, ent in enumerate(ents):                       
+            vals = [pk]
+            for i, ent in enumerate(ents):   
+                if ent:                
+                    if ent.text.strip() == '' and i == 3:
+                        '''
+                        i == 3 is the UNNA column. If it's blank, load the prior UNNA. If
+                        the prior name and hazard class from the previous entry wasn't
+                        blank, copy from those and load in the prior entry's symbol if it
+                        wasn't blank.
+                        '''
+                        vals.append(entries[-1][3])
+                        if not vals[1]:
+                            vals[1] = entries[-1][1]
+                        if not vals[2]:
+                            vals[2] = entries[-1][2]
+                        if prior_symbol != '':
+                            self.load_nonunique_table(
+                                pk, prior_symbol, "symbols", "symbol")
+                    elif i == 3:
+                        prior_symbol = symbol
+                    if i == 0:
+                        symbol = ent.text.strip()
+                    if ent.text.strip() != '':
                         if i in self.nonunique_map.keys():
                             self.load_nonunique_table(pk, ent.text, *self.nonunique_map[i])
-                        elif not ent or ent.text.strip() == '' or ent.text == "None":
-                            vals.append('')
                         else:
                             vals.append(ent.text.strip().replace("'", "''"))
-                    vals = (vals + [None] * 7)[:8]
+                    elif not i in self.nonunique_map.keys():
+                        vals.append(None)
+            vals = (vals + [None] * 7)[:8]
             assert len(vals) == 8
             entries.append(tuple(vals))
             pk += 1
@@ -118,18 +142,4 @@ class HazmatTable:
         print(int(subpart))
         return self.soup.get_subpart_text(173, int(subpart))
 
-    def build_results(self, un_id, bulk):
-        
-        hazmat_id_query = self.db.execute(
-            '''
-            SELECT hazmat_id, hazmat_name, class_division FROM hazmat_table
-            WHERE id_num = '{}';
-            '''.format(un_id))
-        #TO DO : right now we take the first one, need to address UNIDs with >1 row
-        hazmat_id, hazmat_name, class_division = hazmat_id_query.fetchone()
-        
-        return {'UNID': un_id,
-                'hazmat_name': hazmat_name,
-                'bulk': 'Bulk' if bulk else 'Non-Bulk',
-                'forbidden': True if class_division == 'Forbidden' else False,
-                'text': self.get_packaging_173(bulk, hazmat_id)}
+    
