@@ -90,11 +90,12 @@ class Soup:
             for i in range(ix + 1, len(indices)):
                 indices[i] = None
         prior_match_ix = None
-        for paragraph in paragraphs:
+        for pi, paragraph in enumerate(paragraphs):
             beginning = paragraph.text.strip()[:6]
             current_match_ix = None
             for ix, pattern in enumerate(patterns):
                 match = pattern.findall(beginning)
+                no_prior_match = True
                 if match:
                     assert len(match) == 1
                     indices[ix] = match[0]
@@ -106,12 +107,15 @@ class Soup:
             if current_match_ix:
                 continue
             if no_prior_match and current_match_ix == None:
-                current_match_ix = prior_match_ix
-                try:
-                    prior_character = str(int(prior_character) + 1)
-                except ValueError:
-                    prior_character = chr(ord(prior_character) + 1)
-                # TO DO: DEAL WITH INCREMENTING ROMAN NUMERALS.
+                if pi == 0:
+                    continue
+                else:
+                    current_match_ix = prior_match_ix
+                    try:
+                        prior_character = str(int(prior_character) + 1)
+                    except ValueError:
+                        prior_character = chr(ord(prior_character) + 1)
+                    # TO DO: DEAL WITH INCREMENTING ROMAN NUMERALS.
             else:
                 #TO DO: Deal with new <fp> tags that come after the uppercase letter pattern.
                 # For now, we go back to the letter pattern.
