@@ -1,4 +1,4 @@
-from collections import defaultdict
+PART 173—SHIPPERS—GENERAL REQUIREMENTS FOR SHIPMENTS AND PACKAGINGScfrom collections import defaultdict
 import logging
 import os
 
