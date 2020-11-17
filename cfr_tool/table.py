@@ -20,15 +20,26 @@ class HazmatTable:
 
     def create_nonunique_table(self, table_name, col_name):
         self.db.executescript("DROP TABLE IF EXISTS {};".format(table_name))
-        self.db.executescript('''
+        '''
+        Packaging requirements will be loaded later. Nonbulk and bulk requirements will
+        need a foreign key to this table.
+        '''
+        script = '''
                 CREATE TABLE {} (
                 hazmat_id integer not null,
                 {} text,
-                FOREIGN KEY (hazmat_id)
-                REFERENCES hazmat_table (hazmat_id)
-                )
-                '''.format(table_name, col_name)
-        )
+                FOREIGN KEY (hazmat_id) REFERENCES hazmat_table (hazmat_id)
+                )'''.format(table_name, col_name)
+        
+        if table_name == "non_bulk_packaging" or table_name == "bulk_packaging":
+            self.db.executescript(
+                script[:-1] + ''',
+                FOREIGN KEY (requirement) REFERENCES packaging_requirements (requirement))
+                ''')
+        else:
+            self.db.executescript(script)
+        
+        
 
 
     def load_nonunique_table(self, hazmat_id, text, table_name, col_name):
@@ -36,7 +47,7 @@ class HazmatTable:
             split_text = re.findall("[A-Z]", text)
         else:
             # TO DO: some are split on "," without a space
-            split_text = text.split(", ")
+            split_text = text.split(",")
         entries = [(hazmat_id, entry.replace("'", "''").strip())
                 for entry in split_text]
         self.db.executemany(
@@ -107,6 +118,14 @@ class HazmatTable:
                 unna_code text, pg text, rail_max_quant text,
                 aircraft_max_quant text, stowage_location text
             );
+            '''
+        )
+        self.db.executescript(
+            '''
+            CREATE TABLE IF NOT EXISTS packaging_requirements (
+                requirement text,
+                packaging_code text
+            )
             '''
         )
         self.db.executemany(
