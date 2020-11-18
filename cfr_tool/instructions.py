@@ -31,7 +31,7 @@ class Instructions(PackagingCodes):
         packaging_ids = {req[0]: [] for req in nb_reqs}
         for req in nb_reqs:
             try:
-                codes, descs = self.get_spans_paragraphs(int(req[0]), 'b')
+                codes, descs = self.get_spans_paragraphs(int(req[0]))
                 for spans, desc in zip(codes, descs):
                     for span in spans:
                         packaging_ids[req[0]].append(desc[span[0]: span[1]])
@@ -41,7 +41,8 @@ class Instructions(PackagingCodes):
         for req, codes in packaging_ids.items():
             if codes:
                 for code in codes:
-                    insert_list.append((req, code))
+                    if not (req, code) in insert_list:
+                        insert_list.append((req, code))
         print(insert_list)
         self.db.executemany(
             '''
