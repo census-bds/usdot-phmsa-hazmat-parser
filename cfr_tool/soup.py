@@ -1,4 +1,4 @@
-PART 173—SHIPPERS—GENERAL REQUIREMENTS FOR SHIPMENTS AND PACKAGINGScfrom collections import defaultdict
+from collections import defaultdict
 import logging
 import os
 
@@ -56,13 +56,17 @@ class Soup:
         paragraphs = subpart.find_all(["p", "fp"])
         indexed = list(self.gen_paragraph_tree(paragraphs))
         ret_tree = nx.Graph()
-        for ix, paragraph in indexed:
-            canonical = ".".join(i for i in ix if i)
-            parent = ".".join(canonical.split(".")[:-1])
-            ret_tree.add_node(canonical, paragraph=paragraph)
-            if parent:
-                ret_tree.add_edge(parent, canonical)
-
+        if indexed:
+            for ix, paragraph in indexed:
+                canonical = ".".join(i for i in ix if i)
+                parent = ".".join(canonical.split(".")[:-1])
+                ret_tree.add_node(canonical, paragraph=paragraph)
+                if parent:
+                    ret_tree.add_edge(parent, canonical)
+        elif paragraphs:
+            #This deals with an edge case where there are paragraphs without any subparagraphs
+            for paragraph in paragraphs:
+                ret_tree.add_node(None, paragraph=paragraph)
         return ret_tree 
 
 
@@ -73,7 +77,6 @@ class Soup:
         # part 178 subpart 500 paragraph a subparagraph 1
         # sub-sub paragraph i sub-sub-sub paragraph A
         # i.e. 178.500 (a)(1)(i)(A)
-
         letter_pattern = re.compile(r'\((?=[a-z])([^i])\)') #all chars except i
         number_pattern = re.compile(r'\(([0-9]+)\)')
         numeral_pattern = re.compile(r'\(([ivx]+)\)') # this is horrible
