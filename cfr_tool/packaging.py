@@ -1,7 +1,7 @@
 from flask import (
     Blueprint, Flask, flash, g, make_response, redirect, render_template, request, session, url_for
 )
-'''
+
 from . import db
 from . import instructions
 from . import soup
@@ -9,7 +9,7 @@ from . import soup
 import db
 import instructions
 import soup
-
+'''
 bp = Blueprint('packaging', __name__)
 
 def build_results(un_id, bulk, pg, db):

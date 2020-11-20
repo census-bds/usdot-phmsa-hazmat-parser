@@ -1,10 +1,9 @@
-from packaging_codes import PackagingCodes
-from soup import Soup
+from . import packaging_codes as pc
 
-class Instructions(PackagingCodes):
+class Instructions(pc.PackagingCodes):
 
     def __init__(self, db, soup):
-        PackagingCodes.__init__(self, db, soup)
+        pc.PackagingCodes.__init__(self, db, soup)
         self.part = 173
 
     def unna_lookup(self, code, table):
@@ -21,7 +20,7 @@ class Instructions(PackagingCodes):
         self.load_packaging_table("bulk_packaging")
     
     def get_codes(self, req):
-        codes, descs = self.get_spans_paragraphs(int(req))
+        codes, descs = self.get_spans_paragraphs(req)
         packaging_ids = []
         for spans, desc in zip(codes, descs):
             for span in spans:
@@ -38,10 +37,13 @@ class Instructions(PackagingCodes):
         nb_reqs = nb_reqs_query.fetchall()
         packaging_ids = {req[0]: [] for req in nb_reqs}
         for req in nb_reqs:
+            packaging_ids[req[0]] = self.get_codes(req[0])
+            '''
             try:
                 packaging_ids[req[0]] = self.get_codes(req[0])
             except:
                 continue
+            '''
         insert_list = []
         for req, codes in packaging_ids.items():
             if codes:

@@ -45,7 +45,7 @@ class Soup:
     
     def get_subpart_text(self, part, subpart):
         subpart_tag = self.parsed_soup.find(
-            'sectno', text="§ {}.{}".format(str(part), str(subpart)))
+            'sectno', text="§ {}.{}".format(str(part), subpart))
         return subpart_tag.parent
 
     def get_subpart_paragraphs(self, part, subpart):

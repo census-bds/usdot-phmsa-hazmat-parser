@@ -1,6 +1,6 @@
 import networkx as nx
 import regex as re
-import clean_text as ct
+from . import clean_text as ct
 
 '''
 TO DO:
@@ -14,22 +14,28 @@ class PackagingCodes:
         self.soup = soup
         self.categories = []
         self.part = None
-    
-    def get_codes_descriptions(self, subpart, definition_paragraph='a'):
+
+
+    def get_spans_paragraphs(self, subpart):
         #TO DO: make part a property of the child classes and add it as an argument in this function.
         '''
         Extracts packaging codes and the associated text in its tag
         NOte: removed start and end functionality from this. let it loop through in child classes.
         '''
         #Find the code pattern which is digits, letters, digits
-        code_pattern = re.compile("(\d+[A-Z]+\d*)")
+        #TO DO: fix it so that it will only capture one or two digits at the beginning of a string or with white space preceding.
+        code_pattern = re.compile("([\d]{1,2}[A-Z]+\d*)")
         subpart_tag = self.soup.get_subpart_text(self.part, subpart)
         basic_type = subpart_tag.find("subject").text.split("for")[-1][:-1].strip()
         paragraphs = self.soup.get_subpart_paragraphs(self.part, subpart)
-        definitions = nx.subgraph(paragraphs, paragraphs[definition_paragraph])
-        paragraphs = [p.text for d, p in definitions.nodes().data('paragraph')]
+        #definitions = nx.subgraph(paragraphs, paragraphs[definition_paragraph])
+        paragraphs = [p.text for d, p in paragraphs.nodes().data('paragraph')]
         spans = [[m.span() for m in code_pattern.finditer(p)] for p in paragraphs]
         # TODO: remove stopwords?
+        return spans, paragraphs
+
+    def get_codes_descriptions(self, subpart):
+        spans, paragraphs = self.get_spans_paragraphs(subpart)
         codes = [p[s[0][0]:s[-1][1] + 1].strip() for p, s in zip(paragraphs, spans) if s]
         descs = []
         for p, s in zip(paragraphs, spans):

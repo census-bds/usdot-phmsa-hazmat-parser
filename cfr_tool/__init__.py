@@ -3,8 +3,8 @@ import os
 from flask import Flask
 import sqlite3
 
-#from . import soup
-import soup
+from . import soup
+#import soup
 
 
 def create_app(test_config=None):

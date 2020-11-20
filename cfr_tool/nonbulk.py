@@ -1,12 +1,11 @@
 import regex as re
-import packaging_codes as pc
+from . import packaging_codes as pc
 
 class NonBulk(pc.PackagingCodes):
     START = 504
     END = 523
     def __init__(self, db, soup):
-        pc.PackagingStandards.__init__(self, db, soup)
-        self.categories = self.get_categories(self.START, self.END)
+        pc.PackagingCodes.__init__(self, db, soup)
 
     def parse_kind_material(self):
         self.create_kinds_table()
@@ -17,7 +16,7 @@ class NonBulk(pc.PackagingCodes):
         # Looks for the 'B' and 'aluminum within '(ii) “B” means aluminum.'
         pattern_material = re.compile(
             '((?<=\\“)[A-Z](?=\\”\\smeans\\s))|((?<=means\s).*(?=\.))')
-        # Looks for the '1' and 'drum' within '(i) “1” means a drum.'
+        # Looks for the '1' and 'drum' within '(i) “1                                                                                                                                                                                                               means a drum.'
         pattern_kind = re.compile(
             '((?<=\\“)\d(?=\\”\\smeans\\s))|((?<=means\s).*(?=\.))')
         for text in texts:

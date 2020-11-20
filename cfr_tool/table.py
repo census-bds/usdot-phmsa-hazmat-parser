@@ -157,8 +157,6 @@ class HazmatTable:
             '''.format(
                 table_name, hazmat_id))
         subpart = requirement.fetchall()[0][0]
-        print("the subpart")
-        print(int(subpart))
         return self.soup.get_subpart_text(173, int(subpart))
 
     
