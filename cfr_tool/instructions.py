@@ -37,13 +37,11 @@ class Instructions(pc.PackagingCodes):
         nb_reqs = nb_reqs_query.fetchall()
         packaging_ids = {req[0]: [] for req in nb_reqs}
         for req in nb_reqs:
-            packaging_ids[req[0]] = self.get_codes(req[0])
-            '''
             try:
                 packaging_ids[req[0]] = self.get_codes(req[0])
             except:
                 continue
-            '''
+
         insert_list = []
         for req, codes in packaging_ids.items():
             if codes:
