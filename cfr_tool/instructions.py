@@ -5,15 +5,16 @@ class Instructions(pc.PackagingCodes):
     def __init__(self, db, soup):
         pc.PackagingCodes.__init__(self, db, soup)
         self.part = 173
+        self.db = db
+        self.soup = soup
 
-    def unna_lookup(self, code, table):
-        requirement = self.db.execute('''
-            SELECT requirement FROM hazmat_table
-            JOIN {}
-            ON hazmat_table.hazmat_id = {}.hazmat_id
-            WHERE hazmat_table.unna_code = '{}';
-        '''.format(table, table, code))
-        return self.get_spans_paragraphs(int(requirement.fetchone()[0]))
+    def package_text_lookup(self, hazmat_id, bulk):
+        requirement_query = self.db.execute('''
+            SELECT requirement FROM {}
+            WHERE hazmat_id = {}
+        '''.format("bulk_packaging" if bulk else "non_bulk_packaging", hazmat_id))
+        requirement = requirement_query.fetchone()
+        return self.get_spans_paragraphs(requirement[0])
     
     def load_all_packaging_reqs(self):
         self.load_packaging_table("non_bulk_packaging")
