@@ -3,11 +3,14 @@ import click
 from flask import Flask, current_app, g, has_app_context
 from flask.cli import with_appcontext
 import os
-import __init__
+from . import __init__
 
 from . import table, explosives, nonbulk
-from .soup import Soup
-
+from . import soup
+from . import instructions
+'''
+import table, explosives, nonbulk, soup
+'''
 def get_db():
     if has_app_context():
         if 'db' not in g:
@@ -33,20 +36,26 @@ def init_db():
     print("initializing db")
     db = get_db()
     
-    soup_2 = Soup(2)
+    soup_2 = soup.Soup(2)
+    print('made soup')
     hazmat_table = table.HazmatTable(db, soup_2)
     hazmat_table.create_load_hazmat_data()
     print("loaded hazmat")
+    '''
     explosives_parser = explosives.Explosives(db, soup_2)
     explosives_parser.create_load_explosives()
     print("loaded explosives")
-    
-    nb = nonbulk.NonBulk(db, Soup(3))
-    print('made soup')
+    '''
+    instructions_parser = instructions.Instructions(db, soup_2)
+    instructions_parser.load_all_packaging_reqs()
+    print("loaded instructions")
+    '''
+    nb = nonbulk.NonBulk(db, soup.Soup(3))
     nb.parse_kind_material()
     print('parsed kind material')
     nb.load_packaging_categories()
     print('loaded categories')
+    '''
     db.commit()
 
 

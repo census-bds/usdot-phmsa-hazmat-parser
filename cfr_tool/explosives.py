@@ -1,5 +1,5 @@
 import re
-import clean_text as ct
+from . import clean_text as ct
 
 class Explosives:
     def __init__(self, db, soup):
