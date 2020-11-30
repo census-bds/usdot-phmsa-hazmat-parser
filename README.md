@@ -4,7 +4,7 @@ This tool parses Title 49 of the CFR for regulations about shipping hazardous ma
 
 ## Instructions
 
-Run flask in development mode with FLASK_APP=cfr-tool.
+Run flask in development mode with FLASK_APP=cfr_tool. To initialize the database, be sure to run `flask init-db` before `flask run`.
 <br>
 For Linux and Mac:
 ```
