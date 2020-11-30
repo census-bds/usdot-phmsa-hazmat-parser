@@ -3,7 +3,7 @@
 <h1>{{ results['bulk'] }} Packaging Exceptions for UNID {{ results['UNID'] }}</h1>
 <h2>{{ results['hazmat_name'] }}</h2>
 {%for i in range(0, len)%} 
-    <p>{{results['text']}}</p> 
+    <p>{{results['text'][i]|safe}}</p> 
 {%endfor%}
     
 

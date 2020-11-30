@@ -46,11 +46,16 @@ def build_packaging_text(spans_paragraphs):
         if spans:
             increment = 0
             for span in spans:
-                beginning = paragraph[:span[0] + increment]
-                mark = paragraph[span[0] + increment:span[1] + increment]
-                end = paragraph[span[1] + increment:]
+                beginning = marked_par[:span[0] + increment]
+                mark = marked_par[span[0] + increment:span[1] + increment]
+                end = marked_par[span[1] + increment:]
                 marked_par = beginning + "<mark>" + mark + "</mark>" + end
-        output_html.append(marked_par)
+                increment += 13
+            output_html.append(marked_par)
+            print(marked_par)
+            print("above appended")
+            print()
+    print(output_html)
     return output_html              
 
 
