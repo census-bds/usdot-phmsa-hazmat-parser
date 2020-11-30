@@ -14,7 +14,11 @@ class Instructions(pc.PackagingCodes):
             WHERE hazmat_id = {}
         '''.format("bulk_packaging" if bulk else "non_bulk_packaging", hazmat_id))
         requirement = requirement_query.fetchone()
-        return self.get_spans_paragraphs(requirement[0])
+        try:
+            return self.get_spans_paragraphs(requirement[0])
+        except:
+            pass
+        
     
     def load_all_packaging_reqs(self):
         self.load_packaging_table("non_bulk_packaging")

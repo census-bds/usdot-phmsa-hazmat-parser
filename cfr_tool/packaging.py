@@ -28,11 +28,18 @@ def build_results(un_id, bulk, pg, db):
     #TO DO : make sure that UNNA code and pg uniquely identify each row.
     hazmat_id, hazmat_name, class_division = hazmat_id_query.fetchone()
     ins = instructions.Instructions(db, soup.Soup(2))
+    spans_paragraphs = ins.package_text_lookup(hazmat_id, bulk)
+    bulk_text = 'Bulk' if bulk else 'Non-Bulk'
+    if spans_paragraphs:
+        packaging_text = build_packaging_text(spans_paragraphs)
+    else:
+        packaging_text = ["No {} packaging instructions of {} available.".format(
+            bulk_text.lower(), hazmat_name)]
     return {'UNID': un_id,
             'hazmat_name': hazmat_name,
-            'bulk': 'Bulk' if bulk else 'Non-Bulk',
+            'bulk': bulk_text,
             'forbidden': True if class_division == 'Forbidden' else False,
-            'text': build_packaging_text(ins.package_text_lookup(hazmat_id, bulk))}
+            'text': packaging_text}
 
 def build_packaging_text(spans_paragraphs):
     '''
@@ -51,10 +58,10 @@ def build_packaging_text(spans_paragraphs):
                 end = marked_par[span[1] + increment:]
                 marked_par = beginning + "<mark>" + mark + "</mark>" + end
                 increment += 13
-            output_html.append(marked_par)
-            print(marked_par)
-            print("above appended")
-            print()
+        output_html.append(marked_par)
+        print(marked_par)
+        print("above appended")
+        print()
     print(output_html)
     return output_html              
 
