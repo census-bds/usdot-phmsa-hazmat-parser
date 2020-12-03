@@ -97,8 +97,8 @@ class HazmatTable:
                         if i in self.nonunique_map.keys():
                             self.load_nonunique_table(pk, ent.text, *self.nonunique_map[i])
                         else:
-                            vals.append(ent.text.strip().replace("'", "''"))
-                    elif not i in self.nonunique_map.keys():
+                            vals.append(ent.text.strip().replace("'", "''"))                           
+                    elif not i in self.nonunique_map.keys() and i != 3:
                         vals.append(None)
             vals = (vals + [None] * 7)[:8]
             assert len(vals) == 8
