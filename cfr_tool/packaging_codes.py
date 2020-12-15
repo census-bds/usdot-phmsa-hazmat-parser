@@ -1,10 +1,11 @@
 import networkx as nx
 import regex as re
 from . import clean_text as ct
+from .phmsa_regexps import patterns as p
 
 '''
 TO DO:
-Change this to be a class tha represents packaging standards in general.
+Change this to be a class tha represents performance packaging standards in general.
 Convert specific subparts to be children of this class.
 '''
 
@@ -24,7 +25,7 @@ class PackagingCodes:
         '''
         #Find the code pattern which is digits, letters, digits
         #TO DO: fix it so that it will only capture one or two digits at the beginning of a string or with white space preceding.
-        code_pattern = re.compile("([\d]{1,2}[A-Z]+\d*)")
+        code_pattern = re.compile(p.PERF_PACKAGING)
         subpart_tag = self.soup.get_subpart_text(self.part, subpart)
         basic_type = subpart_tag.find("subject").text.split("for")[-1][:-1].strip()
         paragraphs = self.soup.get_subpart_paragraphs(self.part, subpart)

@@ -65,23 +65,30 @@ def build_packaging_text(spans_paragraphs):
     print(output_html)
     return output_html              
 
+def check_packaging(unna, db):
+    db.execute("SELECT pg FROM hazmat_table WHERE unna_code = '{}'".format(unna))
+    pgs = db.fetchall()
+    if len(pgs) > 1:
+        #TO DO: render packaging.html so it shows the multiple PG options for the user to select.
+        render_template('packaging.html')
 
 @bp.route('/packaging',  methods=('GET', 'POST'))
 def packaging():
     if request.method == 'POST':
-        filled_out = [entry[0] for entry in request.form]
         un_id = request.form['un_id']
         bulk = request.form.get('bulk')
-        if not 'packing-group' in filled_out:
+        hazmat_db = db.get_db()
+        if not request.form.get('packing-group'):
+            #check_packaging(un_id, hazmat_db)
             pg = None
         else:
             pg = request.form['packing-group']
-        hazmat_db = db.get_db()
         error = None
 
         print("here's what it got")
         print(un_id)
         print(bulk)
+        
 
         if not un_id:
             error = 'UNID is required.'

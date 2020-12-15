@@ -1,0 +1,3 @@
+[submodule "cfr_tool/phmsa-package-regexps"]
+	path = cfr_tool/phmsa-package-regexps
+	url = https://github.com/nbogda-abs/phmsa-package-regexps.git

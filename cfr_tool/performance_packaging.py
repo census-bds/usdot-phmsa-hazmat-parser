@@ -1,7 +1,7 @@
 from .packaging_codes import PackagingCodes
 from .soup import Soup
 
-class Standards(PackagingCodes):
+class PerformancePackaging(PackagingCodes):
 
     def __init__(self, db, soup):
         PackagingCodes.__init__(self, db, soup)
