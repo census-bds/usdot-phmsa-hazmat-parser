@@ -1,3 +1,9 @@
 [submodule "cfr_tool/phmsa-package-regexps"]
 	path = cfr_tool/phmsa-package-regexps
 	url = https://github.com/nbogda-abs/phmsa-package-regexps.git
+[submodule "cfr_tool/phmsa_package_regexps"]
+	path = cfr_tool/phmsa_package_regexps
+	url = https://github.com/nbogda-abs/phmsa_package_regexps.git
+[submodule "cfr_tool/simple-graph"]
+	path = cfr_tool/simple-graph
+	url = https://github.com/dpapathanasiou/simple-graph.git

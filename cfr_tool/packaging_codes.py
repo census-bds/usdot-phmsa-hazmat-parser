@@ -1,7 +1,7 @@
 import networkx as nx
 import regex as re
 from . import clean_text as ct
-from .phmsa_regexps import patterns as p
+from .phmsa_package_regexps import patterns as p
 
 '''
 TO DO:
@@ -27,13 +27,24 @@ class PackagingCodes:
         #TO DO: fix it so that it will only capture one or two digits at the beginning of a string or with white space preceding.
         code_pattern = re.compile(p.PERF_PACKAGING)
         subpart_tag = self.soup.get_subpart_text(self.part, subpart)
-        basic_type = subpart_tag.find("subject").text.split("for")[-1][:-1].strip()
-        paragraphs = self.soup.get_subpart_paragraphs(self.part, subpart)
-        #definitions = nx.subgraph(paragraphs, paragraphs[definition_paragraph])
-        paragraphs = [p.text for d, p in paragraphs.nodes().data('paragraph')]
-        spans = [[m.span() for m in code_pattern.finditer(p)] for p in paragraphs]
-        # TODO: remove stopwords?
-        return spans, paragraphs
+        if subpart_tag:
+            basic_type = subpart_tag.find("subject").text.split("for")[-1][:-1].strip()
+            paragraphs = self.soup.get_subpart_paragraphs(self.part, subpart)
+            #definitions = nx.subgraph(paragraphs, paragraphs[definition_paragraph])
+            paragraphs = [p.text for d, p in paragraphs.nodes().data('paragraph')]
+            spans = [[m.span() for m in code_pattern.finditer(p)] for p in paragraphs]
+            # TODO: remove stopwords?
+            return spans, paragraphs
+            
+    def get_codes(self, req):
+        spans_paragraphs = self.get_spans_paragraphs(req)
+        if spans_paragraphs:
+            codes, descs = spans_paragraphs
+            packaging_ids = []
+            for spans, desc in zip(codes, descs):
+                for span in spans:
+                    packaging_ids.append(desc[span[0]: span[1]])
+            return packaging_ids
 
     def get_codes_descriptions(self, subpart):
         spans, paragraphs = self.get_spans_paragraphs(subpart)
