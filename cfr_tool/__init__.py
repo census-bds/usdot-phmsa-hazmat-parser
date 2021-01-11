@@ -40,6 +40,9 @@ def create_app(test_config=None):
     app.register_blueprint(packaging.bp)
     app.add_url_rule('/', endpoint='packaging')
 
+    from . import code_lookup
+    app.add_url_rule('/code_lookup', 'code_lookup', code_lookup.code_lookup)
+
     return app
 
 
