@@ -28,7 +28,11 @@ def build_results(un_id, bulk, pg, db):
     #TO DO : make sure that UNNA code and pg uniquely identify each row.
     hazmat_id, hazmat_name, class_division = hazmat_id_query.fetchone()
     ins = instructions.Instructions(db, soup.Soup(2))
-    spans_paragraphs = ins.package_text_lookup(hazmat_id, bulk)
+    requirement = ins.requirement_query(hazmat_id, bulk)
+    try:
+        spans_paragraphs = ins.get_spans_paragraphs(requirement)
+    except:
+        spans_paragraphs = None
     bulk_text = 'Bulk' if bulk else 'Non-Bulk'
     if spans_paragraphs:
         packaging_text = build_packaging_text(spans_paragraphs)
@@ -38,6 +42,7 @@ def build_results(un_id, bulk, pg, db):
     return {'UNID': un_id,
             'hazmat_name': hazmat_name,
             'bulk': bulk_text,
+            'part_num': requirement,
             'forbidden': True if class_division == 'Forbidden' else False,
             'text': packaging_text}
 
@@ -59,10 +64,7 @@ def build_packaging_text(spans_paragraphs):
                 marked_par = beginning + "<mark>" + mark + "</mark>" + end
                 increment += 13
         output_html.append(marked_par)
-        print(marked_par)
-        print("above appended")
-        print()
-    print(output_html)
+
     return output_html              
 
 def check_packaging(unna, db):
@@ -84,11 +86,7 @@ def packaging():
         else:
             pg = request.form['packing-group']
         error = None
-
-        print("here's what it got")
-        print(un_id)
-        print(bulk)
-        
+      
 
         if not un_id:
             error = 'UNID is required.'
