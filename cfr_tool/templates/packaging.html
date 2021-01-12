@@ -1,41 +1,61 @@
 <!doctype html>
 <title>Hazmat Lookup Tool</title>
-<section class="form">
-    <form method="post">
-        <div>
-            <h2>Packaging regulations lookup</h2>
-            <label for="un_id">UNNA Number</label>
-            <input name="un_id" id="un_id" required><br><br>
-            <label for="bulk">Bulk Packaging?</label>
-            <input type="checkbox" name="bulk" id="bulk">
-        </div>
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+<body>
+    <section class="form">
+        <form method="post">
+            <div>
+                <h2>Packaging regulations lookup</h2>
+                <label for="un_id">UNNA Number</label>
+                <input name="un_id" id="un_id" required><br><br>
+                <label for="bulk" >Bulk Packaging?</label>
+                <span data-toggle="tooltip" data-html="true"  title="<p>Bulk packaging means a packaging, other than a vessel or a barge, including a transport vehicle or freight container, in which hazardous materials are loaded with no intermediate form of containment. A Large Packaging in which hazardous materials are loaded with an intermediate form of containment, such as one or more articles or inner packagings, is also a bulk packaging. Additionally, a bulk packaging has:</p><p>(1) A maximum capacity greater than 450 L (119 gallons) as a receptacle for a liquid;</p><p>(2) A maximum net mass greater than 400 kg (882 pounds) and a maximum capacity greater than 450 L (119 gallons) as a receptacle for a solid; or</p><p>(3) A water capacity greater than 454 kg (1000 pounds) as a receptacle for a gas as defined in § 173.115 of this subchapter."</p>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                        <path d="M8.93 6.588l-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                    </svg>
+                </span>
+                <input type="checkbox" name="bulk" id="bulk">
+            </div>
+            
+            <div>
+                <h3>Packing Group</h3>
+                <input type="radio" id="I" name="packing-group" value="I">
+                <label for="I">I</label><br><br>
+                <input type="radio" id="II" name="packing-group" value="II">
+                <label for="II">II</label><br>
+                <input type="radio" id="III" name="packing-group" value="III">
+                <label for="III">III</label><br>
+            </div>
+            <div>
+                <h3>Mode of Transportation</h3>
+                <input type="radio" id="road" name="transit-mode" value="road">
+                <label for="road">Road</label><br>
+                <input type="radio" id="air-cargo" name="transit-mode" value="air-cargo">
+                <label for="air-cargo">Air Cargo</label><br>
+                <input type="radio" id="passenger-air" name="transit-mode" value="passenger-air">
+                <label for="passenger-air">Passenger Air</label><br>
+                <input type="radio" id="rail" name="transit-mode" value="rail">
+                <label for="rail">Rail</label><br><br>
+                <input type="submit" value="Lookup"><br>
+            </div>
+            
+        </form>
         
-        <div>
-            <h3>Packing Group</h3>
-            <input type="radio" id="I" name="packing-group" value="I">
-            <label for="I">I</label><br><br>
-            <input type="radio" id="II" name="packing-group" value="II">
-            <label for="II">II</label><br>
-            <input type="radio" id="III" name="packing-group" value="III">
-            <label for="III">III</label><br>
-        </div>
-        <div>
-            <h3>Mode of Transportation</h3>
-            <input type="radio" id="road" name="transit-mode" value="road">
-            <label for="road">Road</label><br>
-            <input type="radio" id="air-cargo" name="transit-mode" value="air-cargo">
-            <label for="air-cargo">Air Cargo</label><br>
-            <input type="radio" id="passenger-air" name="transit-mode" value="passenger-air">
-            <label for="passenger-air">Passenger Air</label><br>
-            <input type="radio" id="rail" name="transit-mode" value="rail">
-            <label for="rail">Rail</label><br><br>
-            <input type="submit" value="Lookup"><br>
-        </div>
-         
-    </form>
-    
-    {% for message in get_flashed_messages() %}
-        <div class="flash">{{ message }}</div>
-    {% endfor %}
+        {% for message in get_flashed_messages() %}
+            <div class="flash">{{ message }}</div>
+        {% endfor %}
 
-</section>
+    </section>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script>window.jQuery || document.write("<script src='{{url_for('static', filename='jquery-3.5.1.js') }}'>\x3C/script>")</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script type=text/javascript>
+        $(document).ready(function(){
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
+</body>
