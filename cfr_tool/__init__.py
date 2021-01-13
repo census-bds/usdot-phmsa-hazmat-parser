@@ -43,6 +43,9 @@ def create_app(test_config=None):
     from . import code_lookup
     app.add_url_rule('/code_lookup', 'code_lookup', code_lookup.code_lookup)
 
+    from . import packaging_lookup
+    app.add_url_rule('/packaging_lookup', 'packaging_lookup', packaging_lookup.packaging_lookup)
+
     return app
 
 
