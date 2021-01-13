@@ -44,19 +44,15 @@
                 $('[data-toggle="tooltip"]').tooltip();
             });
             $('button').click(function() {
+                if ($("input[name='packing-group']:checked").length) {
+                    var url = '/code_lookup?un=' + $("input#un_id").val() + '&bulk=' + $('input#bulk').is(":checked") + '&pg=' + $("input[name='packing-group']:checked")[0].id
+                    window.location.replace(url)
+                }
                 var json_output = $.getJSON('/pg_lookup', {
-                        un: $("input#un_id").val(),
-                        bulk: $('input#bulk').is(":checked"),
-                        pg: $("input[name='packing-group']:checked").val()
+                        un: $("input#un_id").val()
                     },
                     function(data) {
-                        if ($("input[name='packing-group']:checked").length) {
-                            var pg = $("input[name='packing-group']:checked")[0].id;
-                            console.log("the packing group")
-                            console.log(pg);
-                        }
-                        // how do i get this to not literally return pg
-                        if (data.pgs.length >= 1) {
+                        if (data.pgs.length > 1) {
                             var pg_form = document.getElementById("packing-group");
                             var pg_html = "<h3>Select a packing group for " + $("input#un_id").val() + " </h3>";
                             for (i = 0; i < data.pgs.length; i++) {
@@ -64,6 +60,9 @@
                                 pg_html += `<input type="radio" id="${pg}" name="packing-group" value="{pg}"><label for="${pg}">${pg}</label><br>`
                             };
                             pg_form.innerHTML = pg_html;
+                        } else {
+                            var url = '/code_lookup?un=' + $("input#un_id").val() + '&bulk=' + $('input#bulk').is(":checked")
+                            window.location.replace(url)
                         }
 
                     }
