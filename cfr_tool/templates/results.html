@@ -10,6 +10,17 @@
             flex: 50%;
             padding: 10px;
         }
+        
+        #placeholder {
+            position: relative;
+        }
+        
+        #packaging-standards {
+            position: sticky;
+            top: 0;
+            border: 3px solid #73AD21;
+            padding: 10px
+        }
     </style>
 </head>
 
@@ -49,7 +60,7 @@
                     }, function(data) {
                         console.log("code looked up")
                         var standards = document.getElementById("packaging-standards")
-                        standards.innerHTML = data.html
+                        standards.innerHTML = "<h2>178." + data.subpart + "</h2>" + data.html
 
                     })
                 })
