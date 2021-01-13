@@ -8,13 +8,15 @@ from . import clean_text as ct
 from . import instructions
 
 def build_results(un_id, bulk, pg, db):
+    print("bulk")
+    print(bulk)
     if pg:
         query_text = '''
         SELECT hazmat_id, hazmat_name, class_division FROM hazmat_table
         WHERE unna_code = '{}' and pg = '{}';
         '''.format(un_id, pg)
     else:
-        query_text = query_text = '''
+        query_text = '''
         SELECT hazmat_id, hazmat_name, class_division FROM hazmat_table
         WHERE unna_code = '{}'
         '''.format(un_id)
@@ -25,9 +27,10 @@ def build_results(un_id, bulk, pg, db):
     requirement_query = ins.db.execute('''
             SELECT requirement FROM {}
             WHERE hazmat_id = {}
-        '''.format("bulk_packaging" if bulk else "non_bulk_packaging", hazmat_id))
+        '''.format("bulk_packaging" if bulk == "true" else "non_bulk_packaging", hazmat_id))
     requirement = requirement_query.fetchone()
     requirement = requirement[0]
+
     try:
         spans_paragraphs = ins.get_spans_paragraphs(requirement)
     except:
