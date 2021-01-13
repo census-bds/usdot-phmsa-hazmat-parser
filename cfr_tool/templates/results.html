@@ -1,7 +1,16 @@
 <!doctype html>
 
 <head>
-    <link rel="stylesheet" href="result_styles.css">
+    <style>
+        .packaging-container {
+            display: flex;
+        }
+        
+        .column {
+            flex: 50%;
+            padding: 10px;
+        }
+    </style>
 </head>
 
 <body>
@@ -10,14 +19,15 @@
     <h1>{{ results['bulk'] }} Packaging Instructions for UNNA Number {{ results['UNID'] }}</h1>
     <h2>{{ results['hazmat_name'] }}</h2>
     <div class="packaging-container">
-        <div id="packaging-requirements">
+        <div id="packaging-requirements" class="column">
             <h2>173.{{ results['part_num'] }}</h2>
             {%for i in range(0, len)%}
             <p>{{results['text'][i]|safe}}</p>
             {%endfor%}
         </div>
-        <div id="packaging-standards">
-
+        <div id="placeholder" class="column">
+            <div id="packaging-standards">
+            </div>
         </div>
     </div>
 
@@ -26,20 +36,6 @@
         window.jQuery || document.write("<script src='{{url_for('static', filename='jquery-3.5.1.js') }}'>\x3C/script>")
     </script>
     <script type=text/javascript>
-        // function process(code){
-        //     var json_output = $.getJSON("/code_lookup?code=" + code)
-        //     console.log(json_output)
-        //     console.log(json_output.promise)
-        //     console.log(json_output.responseText)
-        //     console.log(JSON.parse(json_output))
-        // }
-
-        function addShow(data) {
-            console.log("this is running")
-            console.log(data)
-        }
-
-
         $(function() {
             // $('mark').bind('click', function(e){
             //     $.getJSON($SCRIPT_ROOT + '/code_lookup', e.target.firstChild.data, function)
@@ -51,14 +47,11 @@
                     var json_output = $.getJSON("/code_lookup", {
                         code: ev.target.firstChild.data
                     }, function(data) {
-                        console.log(data)
-                    })
+                        console.log("code looked up")
+                        var standards = document.getElementById("packaging-standards")
+                        standards.innerHTML = data.html
 
-                    // $.ajax({
-                    //     method: 'GET',
-                    //     url: {{ url_for('code_lookup')|tojson }},
-                    //     data: $(this).serialize()
-                    // }).done(addShow);
+                    })
                 })
             }
         });
