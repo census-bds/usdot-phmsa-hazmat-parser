@@ -4,6 +4,26 @@ import regex as re
 Some utility functions for parsing and cleaning text.
 '''
 
+def build_packaging_text(spans_paragraphs):
+    '''
+    Take a list with spans in index 0 and paragraphs in index 1 and apply a <mark> tag
+    around the specified spans.
+    '''
+    output_html = []
+    for i, paragraph in enumerate(spans_paragraphs[1]):
+        spans = spans_paragraphs[0][i]
+        marked_par = paragraph
+        if spans:
+            increment = 0
+            for span in spans:
+                beginning = marked_par[:span[0] + increment]
+                mark = marked_par[span[0] + increment:span[1] + increment]
+                end = marked_par[span[1] + increment:]
+                marked_par = beginning + "<mark>" + mark + "</mark>" + end
+                increment += 13
+        output_html.append(marked_par)
+    return output_html 
+
 def clean_new_lines(ent):
     return ent.text.strip('\n').replace('\n', ' ')
 
