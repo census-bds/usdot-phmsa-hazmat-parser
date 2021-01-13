@@ -5,6 +5,7 @@ from flask import (
 from . import db
 from . import instructions
 from . import soup
+from . import clean_text as ct
 '''
 import db
 import instructions
@@ -35,7 +36,7 @@ def build_results(un_id, bulk, pg, db):
         spans_paragraphs = None
     bulk_text = 'Bulk' if bulk else 'Non-Bulk'
     if spans_paragraphs:
-        packaging_text = build_packaging_text(spans_paragraphs)
+        packaging_text = ct.build_packaging_text(spans_paragraphs)
     else:
         packaging_text = ["No {} packaging instructions of {} available.".format(
             bulk_text.lower(), hazmat_name)]
@@ -46,26 +47,7 @@ def build_results(un_id, bulk, pg, db):
             'forbidden': True if class_division == 'Forbidden' else False,
             'text': packaging_text}
 
-def build_packaging_text(spans_paragraphs):
-    '''
-    Take a list with spans in index 0 and paragraphs in index 1 and apply a <mark> tag
-    around the specified spans.
-    '''
-    output_html = []
-    for i, paragraph in enumerate(spans_paragraphs[1]):
-        spans = spans_paragraphs[0][i]
-        marked_par = paragraph
-        if spans:
-            increment = 0
-            for span in spans:
-                beginning = marked_par[:span[0] + increment]
-                mark = marked_par[span[0] + increment:span[1] + increment]
-                end = marked_par[span[1] + increment:]
-                marked_par = beginning + "<mark>" + mark + "</mark>" + end
-                increment += 13
-        output_html.append(marked_par)
-
-    return output_html              
+           
 
 def check_packaging(unna, db):
     db.execute("SELECT pg FROM hazmat_table WHERE unna_code = '{}'".format(unna))
@@ -91,7 +73,7 @@ def packaging():
         if not un_id:
             error = 'UNID is required.'
         else:
-            render_results= build_results(
+            render_results = build_results(
                 un_id, 
                 True if bulk == "on" else False,
                 pg,
