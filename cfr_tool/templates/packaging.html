@@ -44,22 +44,23 @@
                 $('[data-toggle="tooltip"]').tooltip();
             });
             $('button').click(function() {
-                var json_output = $.getJSON('/packaging_lookup', {
+                var json_output = $.getJSON('/pg_lookup', {
                         un: $("input#un_id").val(),
                         bulk: $('input#bulk').is(":checked"),
                         pg: $("input[name='packing-group']:checked").val()
                     },
                     function(data) {
-                        console.log(data);
-                        console.log($("input[name='packing-group']:checked").val());
+                        if ($("input[name='packing-group']:checked").length) {
+                            var pg = $("input[name='packing-group']:checked")[0].id;
+                            console.log("the packing group")
+                            console.log(pg);
+                        }
                         // how do i get this to not literally return pg
                         if (data.pgs.length >= 1) {
                             var pg_form = document.getElementById("packing-group");
-                            var pg_html = "<h3>Select a packing group</h3>";
+                            var pg_html = "<h3>Select a packing group for " + $("input#un_id").val() + " </h3>";
                             for (i = 0; i < data.pgs.length; i++) {
-                                console.log(data.pgs)
                                 var pg = data.pgs[i]
-                                console.log(pg);
                                 pg_html += `<input type="radio" id="${pg}" name="packing-group" value="{pg}"><label for="${pg}">${pg}</label><br>`
                             };
                             pg_form.innerHTML = pg_html;
