@@ -48,6 +48,7 @@ def build_results(un_id, bulk, pg, db):
     return {'UNID': un_id,
             'hazmat_name': hazmat_name,
             'bulk': bulk_text,
+            'pg': pg,
             'part_num': requirement,
             'forbidden': True if class_division == 'Forbidden' else False,
             'text': packaging_text,

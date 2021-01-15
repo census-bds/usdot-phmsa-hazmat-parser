@@ -31,6 +31,13 @@
             border: 3px solid #73AD21;
             padding: 10px
         }
+        
+        #hazmat {
+            background-color: lightgrey;
+            text-align: center;
+            position: sticky;
+            top: 0
+        }
     </style>
 </head>
 
@@ -70,9 +77,10 @@
         {% endfor %}
 
     </section>
+
     {% if results %}
     <div>
-        <h1>{{ results['bulk'] }} Packaging Instructions for {{ results['UNID'] }}: <u>{{ results['hazmat_name'] }} </u></h1>
+        <h1 id="hazmat">{{ results['bulk'] }} Packaging Instructions for {{ results['UNID'] }}{% if results['pg'] %} packing group {{ results['pg']}}{% endif %}: <u>{{ results['hazmat_name'] }} </u></h1>
         <h2>Special Provisions</h2>
         {%for i in range(0, len)%}
         <p>{{results['special_provisions'][i]|safe}}</p>
