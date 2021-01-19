@@ -1,3 +1,5 @@
+import regex as re
+
 from . import packaging_codes as pc
 
 class Instructions(pc.PackagingCodes):
@@ -8,29 +10,41 @@ class Instructions(pc.PackagingCodes):
         self.db = db
         self.soup = soup
 
-    def package_text_lookup(self, hazmat_id, bulk):
-        requirement_query = self.db.execute('''
-            SELECT requirement FROM {}
-            WHERE hazmat_id = {}
-        '''.format("bulk_packaging" if bulk else "non_bulk_packaging", hazmat_id))
-        requirement = requirement_query.fetchone()
-        try:
-            return self.get_spans_paragraphs(requirement[0])
-        except:
-            pass
+    # def package_text_lookup(self, hazmat_id, bulk):
+    #     #requirement = requirement_query(self, hazmat_id, bulk)
+    #     try:
+    #         return self.get_spans_paragraphs(requirement[0])
+    #     except:
+    #         pass
         
-    
+    def get_special_provisions(self, hazmat_id):
+        def _match_code(code):
+            code_pattern = re.compile(code + "(?![A-Za-z0-9])")
+            texts = spec_prov_tag.find_all(text=code_pattern)
+            if texts:
+                #TO DO: Deal with edge cases where the first match is not the proper match.
+                #TO DO: Decide how to display special provisions listed in table format
+                text = texts[0]
+                print(text)
+                print(code)
+                span = code_pattern.match(text).span()
+                return text[0:span[0]] + "<b>" + text[span[0]:span[1]] + "</b>" +\
+                    text[span[1]:len(text) + 1]
+            else:
+                return "<b>" + code + "</b>"
+        special_prov_query = self.db.execute('''
+            SELECT * FROM special_provisions WHERE hazmat_id = {}
+        '''.format(hazmat_id))
+        special_provisions = special_prov_query.fetchall()
+        special_provisions_codes = [x['special_provision'] for x in special_provisions]
+        spec_prov_tag = self.soup.get_subpart_text(172, 102)
+        return [_match_code(code) for code in special_provisions_codes]
+
     def load_all_packaging_reqs(self):
         self.load_packaging_table("non_bulk_packaging")
         self.load_packaging_table("bulk_packaging")
-    
-    def get_codes(self, req):
-        codes, descs = self.get_spans_paragraphs(req)
-        packaging_ids = []
-        for spans, desc in zip(codes, descs):
-            for span in spans:
-                packaging_ids.append(desc[span[0]: span[1]])
-        return packaging_ids
+        pass
+
 
     def load_packaging_table(self, table):
         #TO DO: deal with all reqs that had a letter in them (i.e. 302c)

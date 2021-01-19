@@ -7,6 +7,8 @@ from . import soup
 from . import clean_text as ct
 from . import instructions
 
+
+
 def build_results(un_id, bulk, pg, db):
     print("bulk")
     print(bulk)
@@ -30,10 +32,7 @@ def build_results(un_id, bulk, pg, db):
         '''.format("bulk_packaging" if bulk == "true" else "non_bulk_packaging", hazmat_id))
     requirement = requirement_query.fetchone()
     requirement = requirement[0]
-    special_prov_query = ins.db.execute('''
-        SELECT * FROM special_provisions WHERE hazmat_id = {}
-    '''.format(hazmat_id))
-    special_provisions = special_prov_query.fetchall()
+    
     try:
         spans_paragraphs = ins.get_spans_paragraphs(requirement)
     except:
@@ -44,7 +43,7 @@ def build_results(un_id, bulk, pg, db):
     else:
         packaging_text = ["No {} packaging instructions of {} available.".format(
             bulk_text.lower(), hazmat_name)]
-    print(special_provisions)
+
     return {'UNID': un_id,
             'hazmat_name': hazmat_name,
             'bulk': bulk_text,
@@ -52,7 +51,7 @@ def build_results(un_id, bulk, pg, db):
             'part_num': requirement,
             'forbidden': True if class_division == 'Forbidden' else False,
             'text': packaging_text,
-            'special_provisions': [x['special_provision'] for x in special_provisions]}
+            'special_provisions': ins.get_special_provisions(hazmat_id)}
 
 def code_lookup():
     print(flask.request.args)
