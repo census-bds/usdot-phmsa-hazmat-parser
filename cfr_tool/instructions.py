@@ -24,10 +24,17 @@ class Instructions(pc.PackagingCodes):
             if texts:
                 #TO DO: Deal with edge cases where the first match is not the proper match.
                 #TO DO: Decide how to display special provisions listed in table format
-                text = texts[0]
-                print(text)
+                #For now, we try to pick matches which occur at the very beginning of the text
                 print(code)
-                span = code_pattern.match(text).span()
+                if len(texts) == 1:
+                    text = texts[0]
+                    span = code_pattern.search(text).span()
+                else:
+                    spans = [code_pattern.search(text).span() for text in texts]
+                    span_starts = [span[0] for span in spans]
+                    _, idx = min((val, idx) for (idx, val) in enumerate(span_starts))
+                    text = texts[idx]
+                    span = spans[idx]
                 return text[0:span[0]] + "<b>" + text[span[0]:span[1]] + "</b>" +\
                     text[span[1]:len(text) + 1]
             else:
