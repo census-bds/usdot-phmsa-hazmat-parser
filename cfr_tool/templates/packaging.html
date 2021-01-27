@@ -81,6 +81,7 @@
     {% if results %}
     <div>
         <h1 id="hazmat">{{ results['bulk'] }} Packaging Instructions for {{ results['UNID'] }}{% if results['pg'] %} packing group {{ results['pg']}}{% endif %}: <u>{{ results['hazmat_name'] }} </u></h1>
+        <h2>Quantity Limitations</h2>
         <h2>Special Provisions</h2>
         {%for i in range(0, len)%}
         <p>{{results['special_provisions'][i]|safe}}</p>

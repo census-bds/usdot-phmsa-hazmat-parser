@@ -1,5 +1,4 @@
 import sqlite3
-from prettytable import from_db_cursor
 import re
 
 class HazmatTable:

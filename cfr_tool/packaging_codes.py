@@ -1,7 +1,7 @@
 import networkx as nx
 import regex as re
 from . import clean_text as ct
-from .phmsa_package_regexps import patterns as p
+from . import patterns as p
 
 '''
 TO DO:
