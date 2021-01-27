@@ -7,6 +7,8 @@ from . import soup
 from . import clean_text as ct
 from . import instructions
 
+
+
 def build_results(un_id, bulk, pg, db):
     print("bulk")
     print(bulk)
@@ -30,23 +32,26 @@ def build_results(un_id, bulk, pg, db):
         '''.format("bulk_packaging" if bulk == "true" else "non_bulk_packaging", hazmat_id))
     requirement = requirement_query.fetchone()
     requirement = requirement[0]
-
+    
     try:
         spans_paragraphs = ins.get_spans_paragraphs(requirement)
     except:
         spans_paragraphs = None
-    bulk_text = 'Bulk' if bulk else 'Non-Bulk'
+    bulk_text = 'Bulk' if bulk == "true" else 'Non-Bulk'
     if spans_paragraphs:
         packaging_text = ct.build_packaging_text(spans_paragraphs)
     else:
         packaging_text = ["No {} packaging instructions of {} available.".format(
             bulk_text.lower(), hazmat_name)]
+
     return {'UNID': un_id,
             'hazmat_name': hazmat_name,
             'bulk': bulk_text,
+            'pg': pg,
             'part_num': requirement,
             'forbidden': True if class_division == 'Forbidden' else False,
-            'text': packaging_text}
+            'text': packaging_text,
+            'special_provisions': ins.get_special_provisions(hazmat_id)}
 
 def code_lookup():
     print(flask.request.args)
@@ -58,7 +63,7 @@ def code_lookup():
         hazmat_db = db.get_db()
         render_results = build_results(un, bulk, pg, hazmat_db)
         return flask.render_template(
-            'results.html', len=len(render_results['text']), results=render_results)
+            'packaging.html', len=len(render_results['text']), results=render_results)
     if code:
         cur = db.get_db().cursor()
         cur.execute('''
@@ -80,4 +85,4 @@ def code_lookup():
                            "subpart": subpart,
                            "html": html_text})
     else:
-        return json.dumps({"status": "code not found"})
+        return flask.render_template("packaging.html", results=False)

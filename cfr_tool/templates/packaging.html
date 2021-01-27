@@ -1,28 +1,73 @@
 <!doctype html>
-<title>Hazmat Lookup Tool</title>
 
 <head>
+
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <style>
+        .packaging-container {
+            display: flex;
+        }
+        
+        div {
+            padding: 10px;
+        }
+        
+        .entry {
+            margin-right: 5px
+        }
+        
+        #packaging-requirements {
+            flex: 60%;
+        }
+        
+        #placeholder {
+            position: relative;
+            flex: 40%;
+        }
+        
+        #packaging-standards {
+            position: sticky;
+            top: 0;
+            border: 3px solid #73AD21;
+            padding: 10px
+        }
+        
+        #hazmat {
+            background-color: lightgrey;
+            text-align: center;
+            position: sticky;
+            top: 0
+        }
+    </style>
 </head>
 
 <body>
+
+    <title>Hazmat Lookup Tool</title>
+
     <section class="form">
         <form method="post">
             <div>
-                <h2>Packaging regulations lookup</h2>
-                <label for="un_id">UNNA Number</label>
-                <input name="un_id" id="un_id" required><br><br>
-                <label for="bulk">Bulk Packaging?</label>
-                <span data-toggle="tooltip" data-html="true" title="<p>Bulk packaging means a packaging, other than a vessel or a barge, including a transport vehicle or freight container, in which hazardous materials are loaded with no intermediate form of containment. A Large Packaging in which hazardous materials are loaded with an intermediate form of containment, such as one or more articles or inner packagings, is also a bulk packaging. Additionally, a bulk packaging has:</p><p>(1) A maximum capacity greater than 450 L (119 gallons) as a receptacle for a liquid;</p><p>(2) A maximum net mass greater than 400 kg (882 pounds) and a maximum capacity greater than 450 L (119 gallons) as a receptacle for a solid; or</p><p>(3) A water capacity greater than 454 kg (1000 pounds) as a receptacle for a gas as defined in § 173.115 of this subchapter.</p>">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
-                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                        <path d="M8.93 6.588l-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
-                    </svg>
+                <h1>Packaging regulations lookup</h1>
+                <span class="entry">
+                    <label for="un_id">UNNA Number</label>
+                    <input name="un_id" id="un_id" required>
                 </span>
+                <span class="entry">
+                    <label for="bulk">Bulk Packaging?</label>
+                    <span data-toggle="tooltip" data-html="true" title="<p>Bulk packaging means a packaging, other than a vessel or a barge, including a transport vehicle or freight container, in which hazardous materials are loaded with no intermediate form of containment. A Large Packaging in which hazardous materials are loaded with an intermediate form of containment, such as one or more articles or inner packagings, is also a bulk packaging. Additionally, a bulk packaging has:</p><p>(1) A maximum capacity greater than 450 L (119 gallons) as a receptacle for a liquid;</p><p>(2) A maximum net mass greater than 400 kg (882 pounds) and a maximum capacity greater than 450 L (119 gallons) as a receptacle for a solid; or</p><p>(3) A water capacity greater than 454 kg (1000 pounds) as a receptacle for a gas as defined in § 173.115 of this subchapter.</p>">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                            <path d="M8.93 6.588l-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                        </svg>
+                    </span>
                 <input type="checkbox" name="bulk" id="bulk">
+                </span>
             </div>
-            <div id="packing-group">
-            </div>
+            <span class="entry">
+                <div id="packing-group">
+                </div>
+            </span>
             <button type="button" class="btn btn-primary">Search</button>
 
         </form>
@@ -32,12 +77,37 @@
         {% endfor %}
 
     </section>
+
+    {% if results %}
+    <div>
+        <h1 id="hazmat">{{ results['bulk'] }} Packaging Instructions for {{ results['UNID'] }}{% if results['pg'] %} packing group {{ results['pg']}}{% endif %}: <u>{{ results['hazmat_name'] }} </u></h1>
+        <h2>Quantity Limitations</h2>
+        <h2>Special Provisions</h2>
+        {%for i in range(0, len)%}
+        <p>{{results['special_provisions'][i]|safe}}</p>
+        {%endfor%}
+    </div>
+    <div class="packaging-container">
+        <div id="packaging-requirements" class="column">
+
+            <h2>173.{{ results['part_num'] }}</h2>
+            <h3>Click on highlighted packaging codes to view its packaging standards to the right.</h3>
+            {%for i in range(0, len)%}
+            <p>{{results['text'][i]|safe}}</p>
+            {%endfor%}
+        </div>
+        <div id="placeholder" class="column">
+            <div id="packaging-standards">
+                <h1>Packaging Standards</h1>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script>
         window.jQuery || document.write("<script src='{{url_for('static', filename='jquery-3.5.1.js') }}'>\x3C/script>")
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <script type=text/javascript>
         $(function() {
             $(document).ready(function() {
@@ -54,7 +124,11 @@
                     function(data) {
                         if (data.pgs.length > 1) {
                             var pg_form = document.getElementById("packing-group");
-                            var pg_html = "<h3>Select a packing group for " + $("input#un_id").val() + " </h3>";
+                            var pg_html = "<h3>Select a packing group <span data-toggle='tooltip' title='Packing group means a grouping according to the degree of danger presented by hazardous materials. Packing Group I indicates great danger; Packing Group II, medium danger; Packing Group III, minor danger.'>" +
+                                "<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-info-circle' viewBox='0 0 16 16'>" +
+                                "<path d='M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z'/>" +
+                                "<path d='M8.93 6.588l-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z'/></h3></svg></span>"
+
                             for (i = 0; i < data.pgs.length; i++) {
                                 var pg = data.pgs[i]
                                 pg_html += `<input type="radio" id="${pg}" name="packing-group" value="{pg}"><label for="${pg}">${pg}</label><br>`
@@ -69,6 +143,25 @@
                 )
 
             })
-        })
+
+            // $('mark').bind('click', function(e){
+            //     $.getJSON($SCRIPT_ROOT + '/code_lookup', e.target.firstChild.data, function)
+            // })
+            var marks = document.getElementsByTagName('mark');
+            for (i = 0; i < marks.length; i++) {
+                marks[i].addEventListener('click', function(ev) {
+                    ev.preventDefault();
+                    var json_output = $.getJSON("/code_lookup", {
+                        code: ev.target.firstChild.data
+                    }, function(data) {
+                        console.log("code looked up")
+                        var standards = document.getElementById("packaging-standards");
+                        standards.innerHTML = "<h1>Packaging Standards</h1><h2>178." +
+                            data.subpart + "</h2>" + data.html;
+
+                    })
+                })
+            }
+        });
     </script>
 </body>

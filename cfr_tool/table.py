@@ -1,5 +1,4 @@
 import sqlite3
-from prettytable import from_db_cursor
 import re
 
 class HazmatTable:
@@ -115,8 +114,8 @@ class HazmatTable:
             CREATE TABLE hazmat_table (
                 hazmat_id integer not null primary key,
                 hazmat_name text, class_division text,
-                unna_code text, pg text, rail_max_quant text,
-                aircraft_max_quant text, stowage_location text
+                unna_code text, pg text, passenger_max_quant text,
+                cargo_max_quant text, stowage_location text
             );
             '''
         )
@@ -136,8 +135,8 @@ class HazmatTable:
                 'class_division',
                 'unna_code',
                 'pg',
-                'rail_max_quant',
-                'aircraft_max_quant',
+                'passenger_max_quant',
+                'cargo_max_quant',
                 'stowage_location'
                 )
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
