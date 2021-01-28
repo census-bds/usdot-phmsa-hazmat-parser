@@ -15,14 +15,13 @@ class PerformancePackaging(PackagingCodes):
 
     def parse_specs(self):
         specs = []
- 
-        for subpart in range(self.START, self.END + 1):
-            codes = self.get_codes(subpart)
+        for subsection in range(self.START, self.END + 1):
+            codes = self.get_codes(subsection)
             if codes:
                 for code in set(codes):
                     code_row = (code,
                                 "performance",
-                                subpart)
+                                subsection)
                     assert len(code_row) == 3
                     specs.append(code_row)
         return specs
@@ -52,7 +51,7 @@ class PerformancePackaging(PackagingCodes):
             CREATE TABLE packaging_specs (
                 full_code varchar not null,
                 type text,
-                subpart integer,
+                subsection integer,
                 FOREIGN KEY(full_code) REFERENCES packaging_requirements(packaging_code)
             );
         ''')
@@ -63,7 +62,7 @@ class PerformancePackaging(PackagingCodes):
             INSERT INTO packaging_specs (
                 full_code,
                 type,
-                subpart
+                subsection
             ) VALUES (
                 ?, ?, ?
             )
