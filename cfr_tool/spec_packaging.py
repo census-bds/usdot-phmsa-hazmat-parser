@@ -2,7 +2,7 @@ from . import soup
 import regex as re
 #need to rename repo without hyphen so this won't be necessary
 import importlib
-pattern =  importlib.import_module("cfr_tool.phmsa-package-regexps.patterns")
+from . import patterns 
 
 class SpecPackaging:
     def __init__(self, db):
@@ -23,7 +23,7 @@ class SpecPackaging:
                 subject = sectno.find_next()
                 if subject.name != 'subject':
                     continue
-                spec_pattern = re.compile(pattern.SPEC_PACKAGING)
+                spec_pattern = re.compile(patterns.SPEC_PACKAGING)
                 match = spec_pattern.findall(subject.text)
                 if len(match) == 0:
                     continue
@@ -34,9 +34,9 @@ class SpecPackaging:
     def get_tank_cars(self):
         subparts = self.get_subparts(179)
         for subpart in subparts:
-            tank_car_pattern = re.compile(pattern.TANK_CAR_CODE)
+            tank_car_pattern = re.compile(patterns.TANK_CAR_CODE)
             codes = tank_car_pattern.findall(subpart.text)
-            description_pattern = re.compile(pattern.TANK_CAR_DESCRIPTION)
+            description_pattern = re.compile(patterns.TANK_CAR_DESCRIPTION)
             description = description_pattern.findall(subpart.text)
             print(codes)
             print(description)

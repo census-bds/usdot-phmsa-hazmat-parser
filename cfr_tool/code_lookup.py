@@ -67,7 +67,7 @@ def code_lookup():
     if code:
         cur = db.get_db().cursor()
         cur.execute('''
-            SELECT * FROM packaging_standards WHERE full_code='{}'
+            SELECT * FROM packaging_specs WHERE full_code='{}'
         '''.format(code))
         rows = cur.fetchall()
         #For now, grabs the first result

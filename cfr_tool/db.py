@@ -53,7 +53,7 @@ def init_db():
 
     soup_3 = soup.Soup(3)
     perf_packaging_parser = performance_packaging.PerformancePackaging(db, soup_3)
-    perf_packaging_parser.load_packaging_standards()
+    perf_packaging_parser.load_packaging_specs()
     print("loaded performance packaging")
     '''
     nb = nonbulk.NonBulk(db, soup.Soup(3))
