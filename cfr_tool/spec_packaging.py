@@ -46,12 +46,11 @@ class SpecPackaging:
         ''', [(row[1], "specification", row[0]) for row in self.spec_data])
     
     def get_tank_cars(self):
-        sections = self.get_sections(179)
-        for section in sections:
+        subsections = self.get_sections(179)
+        for subsection in subsections:
+            print(subsection)
             tank_car_pattern = re.compile(patterns.TANK_CAR_CODE)
-            codes = tank_car_pattern.findall(section.text)
-            description_pattern = re.compile(patterns.TANK_CAR_DESCRIPTION)
-            description = description_pattern.findall(section.text)
-            print(codes)
-            print(description)
-            print()
+            codes = tank_car_pattern.findall(subsection.text)
+            # description_pattern = re.compile(patterns.TANK_CAR_DESCRIPTION)
+            # description = description_pattern.findall(section.text)
+            # print(description)

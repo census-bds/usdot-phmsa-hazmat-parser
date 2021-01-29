@@ -1,7 +1,7 @@
 import os
 
 from flask import Flask
-import sqlite3
+from flask_sqlalchemy import SQLAlchemy
 
 from . import soup
 #import soup
@@ -9,11 +9,10 @@ from . import soup
 
 def create_app(test_config=None):
     # create and configure the app
-    app = Flask(__name__, instance_relative_config=True)
-    app.config.from_mapping(
-        SECRET_KEY='dev',
-        DATABASE=os.path.join(app.instance_path, 'hazmat-parser.sqlite'),
-    )
+
+    app = Flask(__name__)
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+    db = SQLAlchemy(app)
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
@@ -49,10 +48,8 @@ def create_app(test_config=None):
     return app
 
 
-def debug_harness(db_name = "instance/hazmat-parser.sqlite"):
-    from importlib import reload
-    reload(soup)
-    s2 = soup.Soup(2)
-    s3 = soup.Soup(3)
-    db = sqlite3.connect(db_name)
-    return s2, s3, db
+    from . import database
+
+    @app.teardown_appcontext
+    def shutdown_session(exception=None):
+        database.db_session.remove()
