@@ -9,6 +9,7 @@ from . import table, explosives, nonbulk
 from . import soup
 from . import instructions
 from . import performance_packaging
+from . import spec_packaging
 '''
 import table, explosives, nonbulk, soup
 '''
@@ -55,13 +56,10 @@ def init_db():
     perf_packaging_parser = performance_packaging.PerformancePackaging(db, soup_3)
     perf_packaging_parser.load_packaging_specs()
     print("loaded performance packaging")
-    '''
-    nb = nonbulk.NonBulk(db, soup.Soup(3))
-    nb.parse_kind_material()
-    print('parsed kind material')
-    nb.load_packaging_categories()
-    print('loaded categories')
-    '''
+    
+    spec_packaging_parser = spec_packaging.SpecPackaging(db)
+    spec_packaging_parser.load_packaging()
+    print("loaded spec packaging and tank cars")
     db.commit()
 
 
