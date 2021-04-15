@@ -8,7 +8,17 @@ ex:
 Within "Specification 2P; inner nonrefillable metal receptacles.", it finds "2P" and
 "inner nonrefillable metal receptacles"
 '''
-SPEC_PACKAGING = "(?<=(?<=S|s)pecification\s)([A-Z0-9]+\s*[A-Z0-9]+)(?=;\s([\w\s]*))"
+SPEC_PACKAGING = "(?<=(?<=S|s)pecification\s)([A-Z0-9]+[\s-]*[A-Z0-9]+)(?=\sand\s)*(?=;*\s([^.]*)\.*)"
+
+'''
+SPEC_PACKAGING_2 parses the description from the above pattern to check for another code
+followed by the word 'and'.
+ex:
+Within "Specification 3A and 3AX seamless steel cylinders.", SPEC_PACKAGING will find
+groups '3A' and 'and 3AX seamless steel cylinders'. SPEC_PACKAGING_2 will parse out
+ 'and 3AX seamless steel cylinders' into '3AX' and 'seamless steel cylinders'.
+'''
+SPEC_PACKAGING_2 = "(?<=and\s)(\d[A-Z]+)(?=\s(.*))"
 
 '''
 TANK_CAR_CODE parses tank car codes out of the subpart headers of part 179 and
