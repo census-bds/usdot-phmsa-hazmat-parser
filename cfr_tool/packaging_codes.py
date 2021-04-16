@@ -1,7 +1,7 @@
 import networkx as nx
 import regex as re
 from . import clean_text as ct
-from . import patterns as p
+from . import patterns
 
 '''
 TO DO:
@@ -17,7 +17,7 @@ class PackagingCodes:
         self.part = None
 
 
-    def get_spans_paragraphs(self, subpart):
+    def get_spans_paragraphs(self, subpart, pattern='performance'):
         #TO DO: make part a property of the child classes and add it as an argument in this function.
         '''
         Extracts packaging codes and the associated text in its tag
@@ -25,19 +25,41 @@ class PackagingCodes:
         '''
         #Find the code pattern which is digits, letters, digits
         #TO DO: fix it so that it will only capture one or two digits at the beginning of a string or with white space preceding.
-        code_pattern = re.compile(p.PERF_PACKAGING)
+        if pattern == 'performance':
+            code_pattern = re.compile(patterns.PERF_PACKAGING)
+        elif pattern == 'tank_car':
+            code_pattern = re.compile(patterns.SPEC_PACKAGING_INSTRUCTIONS)
         subpart_tag = self.soup.get_subpart_text(self.part, subpart)
         if subpart_tag:
-            basic_type = subpart_tag.find("subject").text.split("for")[-1][:-1].strip()
             paragraphs = self.soup.get_subpart_paragraphs(self.part, subpart)
-            #definitions = nx.subgraph(paragraphs, paragraphs[definition_paragraph])
             paragraphs = [p.text for d, p in paragraphs.nodes().data('paragraph')]
-            spans = [[m.span() for m in code_pattern.finditer(p)] for p in paragraphs]
+            spans = []
+            for p in paragraphs:
+                matches = []
+                agencies = []
+                if pattern == 'tank_car':
+                    for pattern_string in patterns.AA_PATTERN:
+                        agency_pattern = re.compile(pattern_string)
+                        for m in agency_pattern.finditer(p):
+                            agencies.append(m.span())
+                for m in code_pattern.finditer(p):
+                    code_span = m.span()
+                    if agencies:
+                        # Find the nearest occurence of an agency right before the code
+                        diffs = [code_span[0] - agency[0] for agency in agencies]
+                        closest_index = diffs.index(min(diffs))
+                        closest_span = agencies[closest_index]
+                        if not closest_span in matches:
+                            matches.append(closest_span)
+                    matches.append(code_span)
+                spans.append(matches)
+            print(spans)
+            #spans = [[m.span() for m in code_pattern.finditer(p)] for p in paragraphs]
             # TODO: remove stopwords?
             return spans, paragraphs
             
-    def get_codes(self, req):
-        spans_paragraphs = self.get_spans_paragraphs(req)
+    def get_codes(self, req, pattern='performance'):
+        spans_paragraphs = self.get_spans_paragraphs(req, pattern)
         if spans_paragraphs:
             codes, descs = spans_paragraphs
             packaging_ids = []
@@ -45,6 +67,7 @@ class PackagingCodes:
                 for span in spans:
                     packaging_ids.append(desc[span[0]: span[1]])
             return packaging_ids
+
 
     def get_codes_descriptions(self, subpart):
         spans, paragraphs = self.get_spans_paragraphs(subpart)
@@ -61,6 +84,5 @@ class PackagingCodes:
                     #TO DO: Figure out what to do in a potential case where the codes are in the middle.
                     #For now, just take the end
                     descs.append(p[code_span[1]:len(p)].strip())
-        types = [basic_type] *  len(codes)
-        return tuple(zip(codes, descs, types))
+        return tuple(zip(codes, descs))
 
