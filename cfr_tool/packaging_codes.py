@@ -35,6 +35,7 @@ class PackagingCodes:
             paragraphs = [p.text for d, p in paragraphs.nodes().data('paragraph')]
             spans = []
             for p in paragraphs:
+
                 matches = []
                 agencies = []
                 if pattern == 'tank_car':
@@ -42,20 +43,23 @@ class PackagingCodes:
                         agency_pattern = re.compile(pattern_string)
                         for m in agency_pattern.finditer(p):
                             agencies.append(m.span())
+
                 for m in code_pattern.finditer(p):
                     code_span = m.span()
                     if agencies:
-                        # Find the nearest occurence of an agency right before the code
-                        diffs = [code_span[0] - agency[0] for agency in agencies]
-                        closest_index = diffs.index(min(diffs))
-                        closest_span = agencies[closest_index]
+                        '''
+                        Find the nearest occurence of an agency right before the code
+                        This should be the smallest positive value of the difference
+                        between the code span and the agency span.
+                        '''
+                        diffs = {code_span[0] - agency[0]: i \
+                            for i, agency in enumerate(agencies)}
+                        positive_vals = [i for i in diffs.keys() if i > 0]
+                        closest_span = agencies[diffs[min(positive_vals)]]
                         if not closest_span in matches:
                             matches.append(closest_span)
                     matches.append(code_span)
                 spans.append(matches)
-            print(spans)
-            #spans = [[m.span() for m in code_pattern.finditer(p)] for p in paragraphs]
-            # TODO: remove stopwords?
             return spans, paragraphs
             
     def get_codes(self, req, pattern='performance'):
