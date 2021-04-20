@@ -19,6 +19,38 @@ class PackagingCodes:
         self.spec_code_pattern = re.compile(patterns.SPEC_PACKAGING_INSTRUCTIONS)
         self.agency_patterns = [re.compile(p) for p in patterns.AA_PATTERN]
 
+    def grab_agency_code_pattern(self, req):
+        '''
+        Loops through paragraphs in a subpart and returns all the codes found in the form
+        of a list of tuples for insertion into the database with the info 
+        (requirement, authorizing_agency, packaging_code, pattern_match)
+        '''
+        paragraphs = self._grab_paragraphs(req)
+        codes = []
+        for p in paragraphs:
+            agency_spans = []
+            agencies = []
+            code_spans = []
+            for agency_pattern in self.agency_patterns:
+                for m in agency_pattern.finditer(p):
+                    agency_spans.append(m.span())
+                    agencies.append(m.group())
+            for m in self.spec_code_pattern.finditer(p):
+                code_span = m.span()
+                code = m.group()
+                diffs = {code_span[0] - agency[0]: i \
+                    for i, agency in enumerate(agency_spans)}
+                positive_vals = [i for i in diffs.keys() if i > 0]
+                closest_agency = agencies[diffs[min(positive_vals)]]
+                codes.append((req, closest_agency, code, 'spec'))
+                code_spans.append(code_span)
+            for m in self.perf_code_pattern.finditer(p):
+                code_span = m.span()
+                code = m.group()
+                if not self._check_overlap(code_span, code_spans):
+                    codes.append((req, None, code, 'perf'))
+        return codes
+
     def grab_pattern_match_spans(self, p):
         '''
         Takes a paragraph and returns a list of character spans to be highlighted
@@ -53,6 +85,12 @@ class PackagingCodes:
                 if i >= match[0] and i < match[1]:
                     return True
         return False
+    
+    def _grab_paragraphs(self, subpart):
+        subpart_tag = self.soup.get_subpart_text(self.part, subpart)
+        if subpart_tag:
+            paragraphs = self.soup.get_subpart_paragraphs(self.part, subpart)
+            return [p.text for d, p in paragraphs.nodes().data('paragraph')]
 
     def get_spans_paragraphs(self, subpart):
         '''
@@ -60,11 +98,8 @@ class PackagingCodes:
         NOte: removed start and end functionality from this. let it loop through in child classes.
         TO DO: convert into a single function which parses both performance and spec packaging.
         '''
-
-        subpart_tag = self.soup.get_subpart_text(self.part, subpart)
-        if subpart_tag:
-            paragraphs = self.soup.get_subpart_paragraphs(self.part, subpart)
-            paragraphs = [p.text for d, p in paragraphs.nodes().data('paragraph')]
+        paragraphs = self._grab_paragraphs(subpart)
+        if paragraphs:
             spans = []
             for p in paragraphs:
                 spans.append(self.grab_pattern_match_spans(p))

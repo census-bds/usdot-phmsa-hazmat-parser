@@ -119,11 +119,14 @@ class HazmatTable:
             );
             '''
         )
+        self.db.executescript("DROP TABLE IF EXISTS packaging_requirements;")
         self.db.executescript(
             '''
             CREATE TABLE IF NOT EXISTS packaging_requirements (
                 requirement text,
-                packaging_code text
+                authorizing_agency text,
+                packaging_code text,
+                pattern_match text
             )
             '''
         )

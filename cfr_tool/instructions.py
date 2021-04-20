@@ -1,5 +1,4 @@
 import regex as re
-
 from . import packaging_codes as pc
 
 class Instructions(pc.PackagingCodes):
@@ -25,7 +24,7 @@ class Instructions(pc.PackagingCodes):
                 #TO DO: Deal with edge cases where the first match is not the proper match.
                 #TO DO: Decide how to display special provisions listed in table format
                 #For now, we try to pick matches which occur at the very beginning of the text
-                print(code)
+
                 if len(texts) == 1:
                     text = texts[0]
                     span = code_pattern.search(text).span()
@@ -61,24 +60,18 @@ class Instructions(pc.PackagingCodes):
             '''.format(table)
         )
         nb_reqs = nb_reqs_query.fetchall()
-        packaging_ids = {req[0]: [] for req in nb_reqs}
-        for req in nb_reqs:
+        packaging_reqs = [req[0] for req in nb_reqs]
+        insert_list = []
+        for req in packaging_reqs:
             try:
-                packaging_ids[req[0]] = self.get_codes(req[0])
+                insert_list += self.grab_agency_code_pattern(req)
             except:
                 continue
 
-        insert_list = []
-        for req, codes in packaging_ids.items():
-            if codes:
-                for code in codes:
-                    if not (req, code) in insert_list:
-                        insert_list.append((req, code))
-        print(insert_list)
         self.db.executemany(
             '''
             INSERT INTO packaging_requirements VALUES (
-                ?, ?
+                ?, ?, ?, ?
             )
             ''', insert_list
         )       
