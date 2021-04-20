@@ -1,3 +1,6 @@
+'''
+Codes below look for performance packaging and tank car codes in part 173.
+'''
 PERF_PACKAGING = "([\d]{1,2}[A-Z]+\d*)"
 SPEC_PACKAGING_INSTRUCTIONS = "(?<=\s)(\d{2,}[A-Z]*\d*[A-Z]*)(?=[\s,].*tank)(?!\s°)"
 AUTHORIZING_AGENCIES = ['AAR', 'DOT', 'IM', 'MC', 'TC']
@@ -10,7 +13,7 @@ ex:
 Within "Specification 2P; inner nonrefillable metal receptacles.", it finds "2P" and
 "inner nonrefillable metal receptacles"
 '''
-SPEC_PACKAGING = "(?<=(?<=S|s)pecification\s)([A-Z0-9]+[\s-]*[A-Z0-9]+)(?=\sand\s)*(?=;*\s([^.]*)\.*)"
+SPEC_PACKAGING = "(?<=(?<=S|s)pecification\s)([A-Z0-9]+[\s-]*[A-Z]*[0-9]+[A-Z0-9]*)(?=\sand\s)*(?=;*\s([^.]*)\.*)"
 
 '''
 SPEC_PACKAGING_2 parses the description from the above pattern to check for another code

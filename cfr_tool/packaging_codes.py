@@ -15,55 +15,63 @@ class PackagingCodes:
         self.soup = soup
         self.categories = []
         self.part = None
+        self.perf_code_pattern = re.compile(patterns.PERF_PACKAGING)
+        self.spec_code_pattern = re.compile(patterns.SPEC_PACKAGING_INSTRUCTIONS)
+        self.agency_patterns = [re.compile(p) for p in patterns.AA_PATTERN]
 
+    def grab_pattern_match_spans(self, p):
+        '''
+        Takes a paragraph and returns a list of character spans to be highlighted
+        for specification and performance codes. This includes the nearest preceding
+        agency abbreviation (i.e. DOT, AAR, etc.) It checks for SPEC_PACKAGING_INSTRUCTIONS
+        first, checks for the agencies, and then checks for PERF_PACKAGING last to avoid
+        overlap.
+        '''
+        matches = []
+        agencies = []
+        for agency_pattern in self.agency_patterns:
+            for m in agency_pattern.finditer(p):
+                agencies.append(m.span())
+        for m in self.spec_code_pattern.finditer(p):
+            code_span = m.span()
+            diffs = {code_span[0] - agency[0]: i \
+                for i, agency in enumerate(agencies)}
+            positive_vals = [i for i in diffs.keys() if i > 0]
+            closest_span = agencies[diffs[min(positive_vals)]]
+            if not closest_span in matches:
+                matches.append(closest_span)
+            matches.append(code_span)
+        for m in self.perf_code_pattern.finditer(p):
+            code_span = m.span()
+            if not self._check_overlap(code_span, matches):
+                matches.append(code_span)
+        return matches
+    
+    def _check_overlap(self, code_span, matches):
+        for match in matches:
+            for i in range(code_span[0], code_span[1]):
+                if i >= match[0] and i < match[1]:
+                    return True
+        return False
 
-    def get_spans_paragraphs(self, subpart, pattern='performance'):
-        #TO DO: make part a property of the child classes and add it as an argument in this function.
+    def get_spans_paragraphs(self, subpart):
         '''
         Extracts packaging codes and the associated text in its tag
         NOte: removed start and end functionality from this. let it loop through in child classes.
+        TO DO: convert into a single function which parses both performance and spec packaging.
         '''
-        #Find the code pattern which is digits, letters, digits
-        #TO DO: fix it so that it will only capture one or two digits at the beginning of a string or with white space preceding.
-        if pattern == 'performance':
-            code_pattern = re.compile(patterns.PERF_PACKAGING)
-        elif pattern == 'tank_car':
-            code_pattern = re.compile(patterns.SPEC_PACKAGING_INSTRUCTIONS)
+
         subpart_tag = self.soup.get_subpart_text(self.part, subpart)
         if subpart_tag:
             paragraphs = self.soup.get_subpart_paragraphs(self.part, subpart)
             paragraphs = [p.text for d, p in paragraphs.nodes().data('paragraph')]
             spans = []
             for p in paragraphs:
-
-                matches = []
-                agencies = []
-                if pattern == 'tank_car':
-                    for pattern_string in patterns.AA_PATTERN:
-                        agency_pattern = re.compile(pattern_string)
-                        for m in agency_pattern.finditer(p):
-                            agencies.append(m.span())
-
-                for m in code_pattern.finditer(p):
-                    code_span = m.span()
-                    if agencies:
-                        '''
-                        Find the nearest occurence of an agency right before the code
-                        This should be the smallest positive value of the difference
-                        between the code span and the agency span.
-                        '''
-                        diffs = {code_span[0] - agency[0]: i \
-                            for i, agency in enumerate(agencies)}
-                        positive_vals = [i for i in diffs.keys() if i > 0]
-                        closest_span = agencies[diffs[min(positive_vals)]]
-                        if not closest_span in matches:
-                            matches.append(closest_span)
-                    matches.append(code_span)
-                spans.append(matches)
+                spans.append(self.grab_pattern_match_spans(p))
             return spans, paragraphs
             
-    def get_codes(self, req, pattern='performance'):
-        spans_paragraphs = self.get_spans_paragraphs(req, pattern)
+    def get_codes(self, req):
+        spans_paragraphs = self.get_spans_paragraphs(req)
         if spans_paragraphs:
             codes, descs = spans_paragraphs
             packaging_ids = []
