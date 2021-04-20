@@ -29,6 +29,17 @@ For Windows PowerShell
 ```
 Open a browser and type in http://127.0.0.1:5000/packaging.
 
-## Web App
+## Using the Web App
 
+The web app within http://127.0.0.1:5000/packaging displays an option for searching the packaging regulations by UNNA number and bulk/non bulk. UNNA number should be searched in the format 'UNXXXX'.
 ![unna_search](images/unna_search.PNG)
+
+Searches of UNNA numbers with packaging instructions that vary by packing group will then be asked to specify the packing group. For example UN3271 has different packaging instructions for packing group II and III.
+![un3271_pg](images/un3271_pg.PNG)
+
+Search results will display placeholders (currently incomplete) for quantity limitations and special provisions, along with the corresponding packaging instructions in part 173. Throughout the text, UNNA packaging numbers are highlighted.
+![un3271_pgiii_nonbulk](images/un3271_pgiii_nonbulk.PNG)
+
+Highlighted UNNA packaging numbers are clickable and will return corresponding packaging standards in the green box to the right. For example, 11G within 173.241 was parsed successfully and will return packaging standards within 178.708. However, many tank car codes and some specification packaging are not yet successfully parsed to match with its packaging standards. Those codes are highlighted but will not return a packaging standard when clicked.
+![standards_241_11G](images/standards_241_11G.PNG)
+
