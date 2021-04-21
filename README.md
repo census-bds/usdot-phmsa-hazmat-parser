@@ -4,7 +4,7 @@ This tool parses Title 49 of the CFR for regulations about shipping hazardous ma
 
 ## Instructions
 
-Download requirements or create a new environment using the provided requirements.txt file. Run flask in development mode with FLASK_APP=cfr_tool. To initialize the database, be sure to run `flask init-db` before `flask run`. Once the database is initialized, `flask init-db` will no longer be necessary.
+Download requirements or create a new environment using the provided requirements.txt file. Run flask in development mode with FLASK_APP=cfr_tool. To initialize the database, choose a directory where your database will be saved, and enter the path after the DATABASE_PATH variable within cfr_tool/db.py. For example, the variable is currently set to `DATABASE_PATH = '/phmsa/hazmat-parser/instance'`. Modify that path to your location of choice. Afterwards,  run `flask init-db` before `flask run`. The command `flask init-db` initializes the database and will store the file hazmat_parser.sqlite within your chosen directory. Once the database is initialized, `flask init-db` will no longer be necessary.
 <br>
 For Linux and Mac:
 ```

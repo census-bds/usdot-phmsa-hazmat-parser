@@ -13,6 +13,8 @@ from . import spec_packaging
 '''
 import table, explosives, nonbulk, soup
 '''
+DATABASE_PATH = '/phmsa/hazmat-parser/instance'
+
 def get_db():
     if has_app_context():
         if 'db' not in g:
@@ -24,7 +26,7 @@ def get_db():
 
         return g.db
     else:
-        db = sqlite3.connect('/phmsa/hazmat-parser/instance/hazmat-parser.sqlite')
+        db = sqlite3.connect(DATABASE_PATH + '/hazmat-parser.sqlite')
         return db
 
 
