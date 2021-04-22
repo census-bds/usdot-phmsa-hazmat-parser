@@ -2,7 +2,7 @@
 
 This tool parses Title 49 of the CFR for regulations about shipping hazardous materials.
 
-## Instructions
+## Set up
 
 Download requirements or create a new environment using the provided requirements.txt file. Run flask in development mode with FLASK_APP=cfr_tool. To initialize the database, choose a directory where your database will be saved, and enter the path after the DATABASE_PATH variable within cfr_tool/db.py. For example, the variable is currently set to `DATABASE_PATH = '/phmsa/hazmat-parser/instance'`. Modify that path to your location of choice. Afterwards,  run `flask init-db` before `flask run`. The command `flask init-db` initializes the database and will store the file hazmat_parser.sqlite within your chosen directory. Once the database is initialized, `flask init-db` will no longer be necessary.
 <br>
@@ -42,4 +42,8 @@ Search results will display placeholders (currently incomplete) for quantity lim
 
 Highlighted UNNA packaging numbers are clickable and will return corresponding packaging standards in the green box to the right. For example, 11G within 173.241 was parsed successfully and will return packaging standards within 178.708. However, many tank car codes and some specification packaging are not yet successfully parsed to match with its packaging standards. Those codes are highlighted but will not return a packaging standard when clicked.
 ![standards_241_11G](images/standards_241_11G.PNG)
+
+## Using the Database
+
+A complete ER diagram of the database exists in 'CFR Database ER Diagram.pdf' and data dictionary within 'data_dictionary.pdf'.
 
