@@ -71,10 +71,10 @@ def code_lookup():
         '''.format(code))
         rows = cur.fetchall()
         #For now, grabs the first result
-        subpart = rows[0]['subpart']
+        section = rows[0]['section']
         p = pc.PackagingCodes(cur, soup.Soup(3))
         p.part = 178
-        spans_paragraphs = p.get_spans_paragraphs(subpart)
+        spans_paragraphs = p.get_spans_paragraphs(section)
         html_list = ct.build_packaging_text(spans_paragraphs)
         html_text = ''
         for p in html_list:
@@ -82,7 +82,7 @@ def code_lookup():
             html_text += p
             html_text += '</p>'
         return json.dumps({"status": "success",
-                           "subpart": subpart,
+                           "section": section,
                            "html": html_text})
     else:
         return flask.render_template("packaging.html", results=False)

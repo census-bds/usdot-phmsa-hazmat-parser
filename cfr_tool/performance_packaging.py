@@ -17,8 +17,8 @@ class PerformancePackaging(PackagingCodes):
         kind_pattern = re.compile('^\d{1,2}')
         material_pattern = re.compile('(?<=\d)[A-Z]{1,2}(?=$|\d)')
  
-        for subpart in range(self.START, self.END + 1):
-            codes = self.get_codes(subpart)
+        for section in range(self.START, self.END + 1):
+            codes = self.get_codes(section)
             if codes:
                 for code in set(codes):
                     kind = kind_pattern.search(code)
@@ -27,26 +27,10 @@ class PerformancePackaging(PackagingCodes):
                                 int(kind.group(0)) if kind else None,
                                 material.group(0) if material else None,
                                 "performance",
-                                subpart)
+                                section)
                     standards.append(code_row)
         return standards
     
-    # Not really sure if these are necessary
-    # def create_kinds_table(self):
-    #     self.db.execute('''
-    #         CREATE TABLE IF NOT EXISTS packaging_kinds(
-    #             id_code integer,
-    #             meaning text
-    #         );
-    #     ''')
-
-    # def create_materials_table(self):
-    #     self.db.execute('''
-    #         CREATE TABLE IF NOT EXISTS packaging_materials (
-    #             id_code integer,
-    #             meaning text
-    #         );
-    #     ''') 
 
     def create_packaging_standards_table(self):
         self.db.execute('''
@@ -58,7 +42,7 @@ class PerformancePackaging(PackagingCodes):
                 kind_id integer,
                 material_id text,
                 type text,
-                subpart integer,
+                section integer,
                 FOREIGN KEY(full_code) REFERENCES packaging_requirements(packaging_code)
             );
         ''')
@@ -71,7 +55,7 @@ class PerformancePackaging(PackagingCodes):
                 kind_id,
                 material_id,
                 type,
-                subpart
+                section
             ) VALUES (
                 ?, ?, ?, ?, ?
             )

@@ -6,11 +6,7 @@ from . import db
 from . import instructions
 from . import soup
 from . import clean_text as ct
-'''
-import db
-import instructions
-import soup
-'''
+
 bp = Blueprint('packaging', __name__)
 
 def build_results(un_id, bulk, pg, db):

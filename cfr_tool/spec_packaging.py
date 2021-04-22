@@ -9,17 +9,17 @@ class SpecPackaging:
         self.s = soup.Soup(3)
         self.db = db
     
-    def get_subparts(self, part):
+    def get_sections(self, part):
         part = self.s.parsed_soup.find_all('ear', text='Pt. {}'.format(part))[0].parent
-        subparts = part.find_all('hd')
-        return [subpart for subpart in subparts \
-            if "Subpart" in subpart.text and "Specifications" in subpart.text]
+        sections = part.find_all('hd')
+        return [section for section in sections \
+            if "Subpart" in section.text and "Specifications" in section.text]
 
     def get_load_sects_subjects(self):
-        subparts = self.get_subparts(178)
+        sections = self.get_sections(178)
         output = []
-        for subpart in subparts:
-            sectnos = subpart.parent.find_all('sectno')
+        for section in sections:
+            sectnos = section.parent.find_all('sectno')
             for sectno in sectnos:
                 subject = sectno.find_next()
                 if subject.name != 'subject':
@@ -44,7 +44,7 @@ class SpecPackaging:
         self.db.execute("DROP TABLE IF EXISTS spec_packaging;")
         self.db.execute('''
             CREATE TABLE spec_packaging(
-                subpart text,
+                section text,
                 code text,
                 description text
             );
@@ -65,7 +65,7 @@ class SpecPackaging:
     
     def get_load_tank_cars(self):
         self.create_tank_car_table()
-        subparts = self.get_subparts(179)
+        subparts = self.get_sections(179)
         insert = []
         for subpart in subparts:
             tank_car_pattern = re.compile(pattern.TANK_CAR_CODE)

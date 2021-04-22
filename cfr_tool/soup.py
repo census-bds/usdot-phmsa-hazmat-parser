@@ -43,18 +43,18 @@ class Soup:
         return [table for table in tables if table.find('ttitle') \
             and table.find('ttitle').text == table_title][0]
     
-    def get_subpart_text(self, part, subpart):
-        subpart_tag = self.parsed_soup.find(
-            'sectno', text="§ {}.{}".format(str(part), subpart))
-        if subpart_tag:
-            return subpart_tag.parent
+    def get_section_text(self, part, section):
+        section_tag = self.parsed_soup.find(
+            'sectno', text="§ {}.{}".format(str(part), section))
+        if section_tag:
+            return section_tag.parent
 
-    def get_subpart_paragraphs(self, part, subpart):
+    def get_section_paragraphs(self, part, section):
         """
-        returns: a networkx graph object of the paragraphs of this subpart
+        returns: a networkx graph object of the paragraphs of this section
         """
-        subpart = self.get_subpart_text(part, subpart)
-        paragraphs = subpart.find_all(["p", "fp"])
+        section = self.get_section_text(part, section)
+        paragraphs = section.find_all(["p", "fp"])
         indexed = list(self.gen_paragraph_tree(paragraphs))
         ret_tree = nx.Graph()
         if indexed:
@@ -75,7 +75,7 @@ class Soup:
     def gen_paragraph_tree(paragraphs):
         # this reflects the nested paragraph structure
         # e.g. you could look at
-        # part 178 subpart 500 paragraph a subparagraph 1
+        # part 178 section 500 paragraph a subparagraph 1
         # sub-sub paragraph i sub-sub-sub paragraph A
         # i.e. 178.500 (a)(1)(i)(A)
         letter_pattern = re.compile(r'\((?=[a-z])([^i])\)') #all chars except i

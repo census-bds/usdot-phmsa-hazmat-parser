@@ -6,7 +6,7 @@ from . import patterns
 '''
 TO DO:
 Change this to be a class tha represents performance packaging standards in general.
-Convert specific subparts to be children of this class.
+Convert specific sections to be children of this class.
 '''
 
 class PackagingCodes:
@@ -21,7 +21,7 @@ class PackagingCodes:
 
     def grab_agency_code_pattern(self, req):
         '''
-        Loops through paragraphs in a subpart and returns all the codes found in the form
+        Loops through paragraphs in a section and returns all the codes found in the form
         of a list of tuples for insertion into the database with the info 
         (requirement, authorizing_agency, packaging_code, pattern_match)
         '''
@@ -86,19 +86,19 @@ class PackagingCodes:
                     return True
         return False
     
-    def _grab_paragraphs(self, subpart):
-        subpart_tag = self.soup.get_subpart_text(self.part, subpart)
-        if subpart_tag:
-            paragraphs = self.soup.get_subpart_paragraphs(self.part, subpart)
+    def _grab_paragraphs(self, section):
+        section_tag = self.soup.get_section_text(self.part, section)
+        if section_tag:
+            paragraphs = self.soup.get_section_paragraphs(self.part, section)
             return [p.text for d, p in paragraphs.nodes().data('paragraph')]
 
-    def get_spans_paragraphs(self, subpart):
+    def get_spans_paragraphs(self, section):
         '''
         Extracts packaging codes and the associated text in its tag
         NOte: removed start and end functionality from this. let it loop through in child classes.
         TO DO: convert into a single function which parses both performance and spec packaging.
         '''
-        paragraphs = self._grab_paragraphs(subpart)
+        paragraphs = self._grab_paragraphs(section)
         if paragraphs:
             spans = []
             for p in paragraphs:
@@ -116,8 +116,8 @@ class PackagingCodes:
             return packaging_ids
 
 
-    def get_codes_descriptions(self, subpart):
-        spans, paragraphs = self.get_spans_paragraphs(subpart)
+    def get_codes_descriptions(self, section):
+        spans, paragraphs = self.get_spans_paragraphs(section)
         codes = [p[s[0][0]:s[-1][1] + 1].strip() for p, s in zip(paragraphs, spans) if s]
         descs = []
         for p, s in zip(paragraphs, spans):

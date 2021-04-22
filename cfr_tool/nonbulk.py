@@ -10,7 +10,7 @@ class NonBulk(pc.PackagingCodes):
     def parse_kind_material(self):
         self.create_kinds_table()
         self.create_materials_table()
-        id_codes = self.soup.get_subpart_text(178, 502)
+        id_codes = self.soup.get_section_text(178, 502)
         texts = [p.text for p in id_codes.find_all('p')]
         parsed_codes = {"packaging_kinds": [], "packaging_materials": []}
         # Looks for the 'B' and 'aluminum within '(ii) “B” means aluminum.'

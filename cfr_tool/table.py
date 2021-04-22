@@ -158,7 +158,7 @@ class HazmatTable:
             WHERE hazmat_id = {}
             '''.format(
                 table_name, hazmat_id))
-        subpart = requirement.fetchall()[0][0]
-        return self.soup.get_subpart_text(173, int(subpart))
+        section = requirement.fetchall()[0][0]
+        return self.soup.get_section_text(173, int(section))
 
     

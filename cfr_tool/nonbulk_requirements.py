@@ -12,6 +12,6 @@ class NonBulkRequirements(pc.PackagingCodes):
         return soup
 
     def get_packaging_codes(self, requirement):
-        text_tags = self.soup.get_subpart_text(173, requirement).find_all()
+        text_tags = self.soup.get_section_text(173, requirement).find_all()
         return text_tags
         
