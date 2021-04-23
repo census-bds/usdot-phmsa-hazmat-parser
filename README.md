@@ -47,3 +47,38 @@ Highlighted UNNA packaging numbers are clickable and will return corresponding p
 
 A complete ER diagram of the database exists in 'CFR Database ER Diagram.pdf' and data dictionary within 'data_dictionary.pdf'.
 
+Below are a few example queries which would answer common questions about the CFR.
+
+What packaging codes are mentioned in the packaging requirements section for non-bulk packaging of UN1075?
+```
+SELECT authorizing_agency, packaging_code FROM packaging_requirements 
+JOIN non_bulk_packaging
+ON packaging_requirements.requirement = non_bulk_packaging.requirement
+JOIN hazmat_table
+ON non_bulk_packaging.hazmat_id = hazmat_table.hazmat_id
+WHERE unna_code = 'UN1075';
+```
+
+According to the packaging requirements, how many hazmat UNNA numbers are associated with nonbulk packaging within a 5H4 plastic film bag?
+```
+SELECT COUNT(DISTINCT unna_code) 
+FROM hazmat_table
+JOIN non_bulk_packaging
+ON hazmat_table.hazmat_id = non_bulk_packaging.hazmat_id
+JOIN packaging_requirements 
+ON packaging_requirements.requirement = non_bulk_packaging.requirement
+WHERE packaging_requirements.packaging_code = '5H4';
+```
+
+According to the packaging requirements, which hazmat are associated with bulk shipping in a DOT 115 cargo tank?
+```
+SELECT DISTINCT unna_code, hazmat_name
+FROM hazmat_table
+JOIN bulk_packaging 
+ON hazmat_table.hazmat_id = bulk_packaging.hazmat_id 
+JOIN packaging_requirements 
+ON packaging_requirements.requirement = bulk_packaging.requirement 
+WHERE packaging_requirements.authorizing_agency = 'DOT'
+AND packaging_requirements.packaging_code = '115';
+```
+
