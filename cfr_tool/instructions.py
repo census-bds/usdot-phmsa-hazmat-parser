@@ -43,7 +43,7 @@ class Instructions(pc.PackagingCodes):
         '''.format(hazmat_id))
         special_provisions = special_prov_query.fetchall()
         special_provisions_codes = [x['special_provision'] for x in special_provisions]
-        spec_prov_tag = self.soup.get_subpart_text(172, 102)
+        spec_prov_tag = self.soup.get_section_text(172, 102)
         return [_match_code(code) for code in special_provisions_codes]
 
     def load_all_packaging_reqs(self):
