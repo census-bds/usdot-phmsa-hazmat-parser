@@ -14,22 +14,22 @@ def build_results(un_id, bulk, pg, db):
     print(bulk)
     if pg:
         query_text = '''
-        SELECT hazmat_id, hazmat_name, class_division FROM hazmat_table
+        SELECT row_id, hazmat_name, class_division FROM hazmat_table
         WHERE unna_code = '{}' and pg = '{}';
         '''.format(un_id, pg)
     else:
         query_text = '''
-        SELECT hazmat_id, hazmat_name, class_division FROM hazmat_table
+        SELECT row_id, hazmat_name, class_division FROM hazmat_table
         WHERE unna_code = '{}'
         '''.format(un_id)
-    hazmat_id_query = db.execute(query_text)
+    row_id_query = db.execute(query_text)
     #TO DO : make sure that UNNA code and pg uniquely identify each row.
-    hazmat_id, hazmat_name, class_division = hazmat_id_query.fetchone()
+    row_id, hazmat_name, class_division = row_id_query.fetchone()
     ins = instructions.Instructions(db, soup.Soup(2))
     requirement_query = ins.db.execute('''
             SELECT requirement FROM {}
-            WHERE hazmat_id = {}
-        '''.format("bulk_packaging" if bulk == "true" else "non_bulk_packaging", hazmat_id))
+            WHERE row_id = {}
+        '''.format("bulk_packaging" if bulk == "true" else "non_bulk_packaging", row_id))
     requirement = requirement_query.fetchone()
     requirement = requirement[0]
     
@@ -51,7 +51,7 @@ def build_results(un_id, bulk, pg, db):
             'part_num': requirement,
             'forbidden': True if class_division == 'Forbidden' else False,
             'text': packaging_text,
-            'special_provisions': ins.get_special_provisions(hazmat_id)}
+            'special_provisions': ins.get_special_provisions(row_id)}
 
 def code_lookup():
     print(flask.request.args)

@@ -9,14 +9,9 @@ class Instructions(pc.PackagingCodes):
         self.db = db
         self.soup = soup
 
-    # def package_text_lookup(self, hazmat_id, bulk):
-    #     #requirement = requirement_query(self, hazmat_id, bulk)
-    #     try:
-    #         return self.get_spans_paragraphs(requirement[0])
-    #     except:
-    #         pass
+
         
-    def get_special_provisions(self, hazmat_id):
+    def get_special_provisions(self, row_id):
         def _match_code(code):
             code_pattern = re.compile(code + "(?![A-Za-z0-9])")
             texts = spec_prov_tag.find_all(text=code_pattern)
@@ -39,8 +34,8 @@ class Instructions(pc.PackagingCodes):
             else:
                 return "<b>" + code + "</b>"
         special_prov_query = self.db.execute('''
-            SELECT * FROM special_provisions WHERE hazmat_id = {}
-        '''.format(hazmat_id))
+            SELECT * FROM special_provisions WHERE row_id = {}
+        '''.format(row_id))
         special_provisions = special_prov_query.fetchall()
         special_provisions_codes = [x['special_provision'] for x in special_provisions]
         spec_prov_tag = self.soup.get_section_text(172, 102)

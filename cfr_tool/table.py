@@ -25,9 +25,9 @@ class HazmatTable:
         '''
         script = '''
                 CREATE TABLE {} (
-                hazmat_id integer not null,
+                row_id integer not null,
                 {} text,
-                FOREIGN KEY (hazmat_id) REFERENCES hazmat_table (hazmat_id)
+                FOREIGN KEY (row_id) REFERENCES hazmat_table (row_id)
                 )'''.format(table_name, col_name)
         
         if table_name == "non_bulk_packaging" or table_name == "bulk_packaging":
@@ -41,16 +41,16 @@ class HazmatTable:
         
 
 
-    def load_nonunique_table(self, hazmat_id, text, table_name, col_name):
+    def load_nonunique_table(self, row_id, text, table_name, col_name):
         if table_name == "symbols":
             split_text = re.findall("[A-Z]", text)
         else:
             # TO DO: some are split on "," without a space
             split_text = text.split(",")
-        entries = [(hazmat_id, entry.replace("'", "''").strip())
+        entries = [(row_id, entry.replace("'", "''").strip())
                 for entry in split_text]
         self.db.executemany(
-            "INSERT INTO {} (hazmat_id, {}) VALUES (?, ?)".format(
+            "INSERT INTO {} (row_id, {}) VALUES (?, ?)".format(
                 table_name, col_name),
             entries)
 
@@ -112,7 +112,7 @@ class HazmatTable:
         self.db.executescript(
             '''
             CREATE TABLE hazmat_table (
-                hazmat_id integer not null primary key,
+                row_id integer not null primary key,
                 hazmat_name text, class_division text,
                 unna_code text, pg text, passenger_max_quant text,
                 cargo_max_quant text, stowage_location text
@@ -133,7 +133,7 @@ class HazmatTable:
         self.db.executemany(
             '''
             INSERT INTO 'hazmat_table' (
-                'hazmat_id',
+                'row_id',
                 'hazmat_name',
                 'class_division',
                 'unna_code',
@@ -147,7 +147,7 @@ class HazmatTable:
         )
             
 
-    def get_packaging_173(self, bulk, hazmat_id):
+    def get_packaging_173(self, bulk, row_id):
         if bulk:
             table_name = "bulk_packaging"
         else:
@@ -155,9 +155,9 @@ class HazmatTable:
         requirement = self.db.execute(
             '''
             SELECT requirement FROM {} 
-            WHERE hazmat_id = {}
+            WHERE row_id = {}
             '''.format(
-                table_name, hazmat_id))
+                table_name, row_id))
         section = requirement.fetchall()[0][0]
         return self.soup.get_section_text(173, int(section))
 
