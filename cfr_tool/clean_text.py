@@ -9,10 +9,11 @@ def build_packaging_text(spans_paragraphs):
     Take a list with spans in index 0 and paragraphs in index 1 and apply a <mark> tag
     around the specified spans.
     '''
+    print(spans_paragraphs)
     output_html = []
     for i, paragraph in enumerate(spans_paragraphs[1]):
         spans = spans_paragraphs[0][i]
-        marked_par = paragraph
+        marked_par = paragraph[1]
         if spans:
             increment = 0
             for span in spans:

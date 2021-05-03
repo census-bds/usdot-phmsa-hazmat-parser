@@ -9,8 +9,8 @@ class HazmatTable:
             5: ("label_codes", "label_code"),
             6: ("special_provisions", "special_provision"),
             7: ("packaging_exceptions", "exception"),
-            8: ("non_bulk_packaging", "requirement"),
-            9: ("bulk_packaging", "requirement"),
+            # 8: ("packaging_instructions", "section"),
+            # 9: ("packaging_instructions", "section"),
             13: ("stowage_codes", "stowage_code")
         }
         self.db = db
@@ -30,15 +30,24 @@ class HazmatTable:
                 FOREIGN KEY (row_id) REFERENCES hazmat_table (row_id)
                 )'''.format(table_name, col_name)
         
-        if table_name == "non_bulk_packaging" or table_name == "bulk_packaging":
-            self.db.executescript(
-                script[:-1] + ''',
-                FOREIGN KEY (requirement) REFERENCES packaging_requirements (requirement))
-                ''')
-        else:
-            self.db.executescript(script)
+        self.db.executescript(script)
         
-        
+    def create_packaging_instructions_table(self):
+        self.db.executescript(
+            '''
+            DROP TABLE IF EXISTS packaging_instructions;
+            '''
+        )
+        self.db.executescript(
+            '''
+            CREATE TABLE packaging_instructions (
+                row_id integer not null,
+                section text,
+                bulk integer,
+                FOREIGN KEY (row_id) REFERENCES hazmat_table (row_id)
+            )
+            '''
+        )
 
 
     def load_nonunique_table(self, row_id, text, table_name, col_name):
@@ -53,6 +62,18 @@ class HazmatTable:
             "INSERT INTO {} (row_id, {}) VALUES (?, ?)".format(
                 table_name, col_name),
             entries)
+    
+    def load_packaging_instructions(self, row_id, section_num, i):
+        if section_num.isdigit():
+            self.db.execute(
+                '''
+                INSERT INTO packaging_instructions (row_id, section, bulk) VALUES (
+                    {}, {}, {}
+                )
+                '''.format(
+                    row_id, "173." + section_num, 0 if i == 8 else 1
+                )
+            )
 
 
     def create_hazmat_entries(self):
@@ -95,6 +116,8 @@ class HazmatTable:
                     if ent.text.strip() != '':
                         if i in self.nonunique_map.keys():
                             self.load_nonunique_table(pk, ent.text, *self.nonunique_map[i])
+                        elif i == 8 or i == 9:
+                            self.load_packaging_instructions(pk, ent.text, i)
                         else:
                             vals.append(ent.text.strip().replace("'", "''"))                           
                     elif not i in self.nonunique_map.keys() and i != 3:
@@ -109,6 +132,7 @@ class HazmatTable:
         self.db.executescript("DROP TABLE IF EXISTS hazmat_table;")
         for table_name, column in self.nonunique_map.values():
             self.create_nonunique_table(table_name, column)
+        self.create_packaging_instructions_table()
         self.db.executescript(
             '''
             CREATE TABLE hazmat_table (
@@ -123,10 +147,13 @@ class HazmatTable:
         self.db.executescript(
             '''
             CREATE TABLE IF NOT EXISTS packaging_requirements (
-                requirement text,
+                section text,
                 authorizing_agency text,
                 packaging_code text,
-                pattern_match text
+                pattern_match text,
+                paragraph text,
+                span_0 integer,
+                span_1 integer
             )
             '''
         )

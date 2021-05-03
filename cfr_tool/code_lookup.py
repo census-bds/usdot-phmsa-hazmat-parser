@@ -27,9 +27,9 @@ def build_results(un_id, bulk, pg, db):
     row_id, hazmat_name, class_division = row_id_query.fetchone()
     ins = instructions.Instructions(db, soup.Soup(2))
     requirement_query = ins.db.execute('''
-            SELECT requirement FROM {}
-            WHERE row_id = {}
-        '''.format("bulk_packaging" if bulk == "true" else "non_bulk_packaging", row_id))
+            SELECT section FROM packaging_instructions
+            WHERE row_id = {} AND bulk = {}
+        '''.format(row_id, 1 if bulk else 0))
     requirement = requirement_query.fetchone()
     requirement = requirement[0]
     

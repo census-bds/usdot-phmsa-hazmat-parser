@@ -32,23 +32,27 @@ class PackagingCodes:
             agencies = []
             code_spans = []
             for agency_pattern in self.agency_patterns:
-                for m in agency_pattern.finditer(p):
+                for m in agency_pattern.finditer(p[1]):
                     agency_spans.append(m.span())
                     agencies.append(m.group())
-            for m in self.spec_code_pattern.finditer(p):
+            for m in self.spec_code_pattern.finditer(p[1]):
                 code_span = m.span()
                 code = m.group()
                 diffs = {code_span[0] - agency[0]: i \
                     for i, agency in enumerate(agency_spans)}
                 positive_vals = [i for i in diffs.keys() if i > 0]
                 closest_agency = agencies[diffs[min(positive_vals)]]
-                codes.append((req, closest_agency, code, 'spec'))
+                codes.append(
+                    (req, closest_agency, code, 'spec', p[0], code_span[0], code_span[1])
+                )
                 code_spans.append(code_span)
-            for m in self.perf_code_pattern.finditer(p):
+            for m in self.perf_code_pattern.finditer(p[1]):
                 code_span = m.span()
                 code = m.group()
                 if not self._check_overlap(code_span, code_spans):
-                    codes.append((req, None, code, 'perf'))
+                    codes.append(
+                        (req, None, code, 'perf', p[0], code_span[0], code_span[1])
+                    )
         return codes
 
     def grab_pattern_match_spans(self, p):
@@ -87,10 +91,10 @@ class PackagingCodes:
         return False
     
     def _grab_paragraphs(self, section):
-        section_tag = self.soup.get_section_text(self.part, section)
+        section_tag = self.soup.get_section_text(section)
         if section_tag:
-            paragraphs = self.soup.get_section_paragraphs(self.part, section)
-            return [p.text for d, p in paragraphs.nodes().data('paragraph')]
+            paragraphs = self.soup.get_section_paragraphs(section)
+            return [(d, p.text) for d, p in paragraphs.nodes().data('paragraph')]
 
     def get_spans_paragraphs(self, section):
         '''
@@ -102,7 +106,7 @@ class PackagingCodes:
         if paragraphs:
             spans = []
             for p in paragraphs:
-                spans.append(self.grab_pattern_match_spans(p))
+                spans.append(self.grab_pattern_match_spans(p[1]))
             return spans, paragraphs
             
     def get_codes(self, req):

@@ -38,21 +38,15 @@ class Instructions(pc.PackagingCodes):
         '''.format(row_id))
         special_provisions = special_prov_query.fetchall()
         special_provisions_codes = [x['special_provision'] for x in special_provisions]
-        spec_prov_tag = self.soup.get_section_text(172, 102)
+        spec_prov_tag = self.soup.get_section_text('172.102')
         return [_match_code(code) for code in special_provisions_codes]
 
     def load_all_packaging_reqs(self):
-        self.load_packaging_table("non_bulk_packaging")
-        self.load_packaging_table("bulk_packaging")
-        pass
 
-
-    def load_packaging_table(self, table):
-        #TO DO: deal with all reqs that had a letter in them (i.e. 302c)
         nb_reqs_query = self.db.execute(
             '''
-            SELECT DISTINCT requirement FROM {};
-            '''.format(table)
+            SELECT DISTINCT section FROM packaging_instructions;
+            '''
         )
         nb_reqs = nb_reqs_query.fetchall()
         packaging_reqs = [req[0] for req in nb_reqs]
@@ -66,7 +60,7 @@ class Instructions(pc.PackagingCodes):
         self.db.executemany(
             '''
             INSERT INTO packaging_requirements VALUES (
-                ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?, ?
             )
             ''', insert_list
         )       

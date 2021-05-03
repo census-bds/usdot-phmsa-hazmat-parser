@@ -43,18 +43,18 @@ class Soup:
         return [table for table in tables if table.find('ttitle') \
             and table.find('ttitle').text == table_title][0]
     
-    def get_section_text(self, part, section):
+    def get_section_text(self, section):
         section_tag = self.parsed_soup.find(
-            'sectno', text="§ {}.{}".format(str(part), section))
+            'sectno', text="§ {}".format(section))
         if section_tag:
             return section_tag.parent
 
-    def get_section_paragraphs(self, part, section):
+    def get_section_paragraphs(self, section):
         """
         returns: a networkx graph object of the paragraphs of this section
         """
-        section = self.get_section_text(part, section)
-        paragraphs = section.find_all(["p", "fp"])
+        section_text = self.get_section_text(section)
+        paragraphs = section_text.find_all(["p", "fp"])
         indexed = list(self.gen_paragraph_tree(paragraphs))
         ret_tree = nx.Graph()
         if indexed:
