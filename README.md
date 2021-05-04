@@ -13,7 +13,7 @@ conda create --name <env> --file requirements.txt
 ```
 2. Before initializing the database, choose a directory where your database will be saved, and enter the path after the DATABASE_PATH variable within cfr_tool/db.py. For example, the variable is currently set to `DATABASE_PATH = '/phmsa/hazmat-parser/instance'`. Modify that path to your location of choice. 
 
-2. Run flask in development mode with FLASK_APP=cfr_tool. Afterwards,  run `flask init-db` before `flask run`. The command `flask init-db` initializes the database and will store the file hazmat_parser.sqlite within your chosen directory. Once the database is initialized, `flask init-db` will no longer be necessary.
+2. Run flask in development mode with FLASK_APP=cfr_tool. Afterwards,  run `flask init-db` before `flask run`. The command `flask init-db` initializes the database and will store the file hazmat_parser.sqlite within your chosen directory. Once the database is initialized, `flask init-db` will no longer be necessary. The command `flask run` opens the web app.
 <br>
 For Linux and Mac:
 ```
@@ -54,40 +54,47 @@ Highlighted UNNA packaging numbers are clickable and will return corresponding p
 
 ## Using the Database
 
-A complete ER diagram of the database exists in 'CFR Database ER Diagram.pdf' and data dictionary within 'data_dictionary.pdf'.
+To access the database:
+
+1. Open up sqlite by running `sqlite`.
+
+2. In sqlite, run `.open <db path>`. By default, the database is located in 'instance/hazmat-parser.sqlite'. This should be recorded in the DATABASE_PATH variable within cfr_tool/db.py.
+
+3. Begin querying. A complete ER diagram of the database exists in 'CFR Database ER Diagram.pdf' and data dictionary within 'data_dictionary.pdf'.
 
 Below are a few example queries which would answer common questions about the CFR.
 
 What packaging codes are mentioned in the packaging requirements section for non-bulk packaging of UN1075?
 ```
 SELECT authorizing_agency, packaging_code FROM packaging_requirements 
-JOIN non_bulk_packaging
-ON packaging_requirements.requirement = non_bulk_packaging.requirement
+JOIN packaging_instructions
+ON packaging_requirements.section = packaging_instructions.section
 JOIN hazmat_table
-ON non_bulk_packaging.hazmat_id = hazmat_table.hazmat_id
-WHERE unna_code = 'UN1075';
+ON packaging_instructions.row_id = hazmat_table.row_id
+WHERE unna_code = 'UN1075' AND packaging_instructions.bulk = 0;
 ```
 
 According to the packaging requirements, how many hazmat UNNA numbers are associated with nonbulk packaging within a 5H4 plastic film bag?
 ```
 SELECT COUNT(DISTINCT unna_code) 
 FROM hazmat_table
-JOIN non_bulk_packaging
-ON hazmat_table.hazmat_id = non_bulk_packaging.hazmat_id
+JOIN packaging_instructions
+ON hazmat_table.row_id = non_bulk_packaging.row_id
 JOIN packaging_requirements 
-ON packaging_requirements.requirement = non_bulk_packaging.requirement
-WHERE packaging_requirements.packaging_code = '5H4';
+ON packaging_requirements.section = packaging_instructions.section
+WHERE packaging_requirements.packaging_code = '5H4' AND packaging_instructions.bulk = 0;
 ```
 
 According to the packaging requirements, which hazmat are associated with bulk shipping in a DOT 115 cargo tank?
 ```
 SELECT DISTINCT unna_code, hazmat_name
 FROM hazmat_table
-JOIN bulk_packaging 
-ON hazmat_table.hazmat_id = bulk_packaging.hazmat_id 
+JOIN packaging_instructions
+ON hazmat_table.row_id = bulk_packaging.row_id 
 JOIN packaging_requirements 
-ON packaging_requirements.requirement = bulk_packaging.requirement 
+ON packaging_requirements.section = packaging_instructions.section
 WHERE packaging_requirements.authorizing_agency = 'DOT'
-AND packaging_requirements.packaging_code = '115';
+AND packaging_requirements.packaging_code = '115'
+AND packaging_instructions.bulk = 1;
 ```
 
