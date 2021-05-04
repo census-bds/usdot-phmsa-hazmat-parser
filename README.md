@@ -7,7 +7,7 @@ This tool parses Title 49 of the CFR for regulations about shipping hazardous ma
 1. Create a conda environment using the provided environment.yml file by running:
 
 ```
-conda create --name <env> --file environment.yml
+conda env create -f environment.yml
 ```
 2. Before initializing the database, choose a directory where your database will be saved, and enter the path after the DATABASE_PATH variable within cfr_tool/db.py. For example, the variable is currently set to `DATABASE_PATH = '../hazmat-parser/instance'`. Modify that path to your location of choice. 
 
