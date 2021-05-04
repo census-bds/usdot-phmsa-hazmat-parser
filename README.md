@@ -34,11 +34,11 @@ For Windows PowerShell
 > flask init-db
 > flask run
 ```
-Open a browser and type in http://127.0.0.1:5000/packaging.
+Open a browser and type in http://127.0.0.1:5000/.
 
 ## Using the Web App
 
-The web app within http://127.0.0.1:5000/packaging displays an option for searching the packaging regulations by UNNA number and bulk/non bulk. UNNA number should be searched in the format 'UNXXXX'.
+The web app within http://127.0.0.1:5000/ displays an option for searching the packaging regulations by UNNA number and bulk/non bulk. UNNA number should be searched in the format 'UNXXXX'.
 ![unna_search](images/unna_search.PNG)
 
 Searches of UNNA numbers with packaging instructions that vary by packing group will then be asked to specify the packing group. For example UN3271 has different packaging instructions for packing group II and III.

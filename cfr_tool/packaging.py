@@ -13,19 +13,20 @@ def build_results(un_id, bulk, pg, db):
     table = "bulk_packaging" if bulk else "non_bulk_packaging"
     if pg:
         query_text = '''
-        SELECT hazmat_id, hazmat_name, class_division FROM hazmat_table
+        SELECT row_id, hazmat_name, class_division FROM hazmat_table
         WHERE unna_code = '{}' and pg = '{}';
         '''.format(un_id, pg)
     else:
         query_text = query_text = '''
-        SELECT hazmat_id, hazmat_name, class_division FROM hazmat_table
+        SELECT row_id, hazmat_name, class_division FROM hazmat_table
         WHERE unna_code = '{}'
         '''.format(un_id)
-    hazmat_id_query = db.execute(query_text)
+    row_id_query = db.execute(query_text)
     #TO DO : make sure that UNNA code and pg uniquely identify each row.
-    hazmat_id, hazmat_name, class_division = hazmat_id_query.fetchone()
+    row_id, hazmat_name, class_division = row_id_query.fetchone()
     ins = instructions.Instructions(db, soup.Soup(2))
-    requirement = ins.requirement_query(hazmat_id, bulk)
+    requirement = ins.requirement_query(row_id, bulk)
+
     try:
         spans_paragraphs = ins.get_spans_paragraphs(requirement)
     except:
@@ -52,7 +53,7 @@ def check_packaging(unna, db):
         #TO DO: render packaging.html so it shows the multiple PG options for the user to select.
         render_template('packaging.html')
 
-@bp.route('/packaging',  methods=('GET', 'POST'))
+@bp.route('/',  methods=('GET', 'POST'))
 def packaging():
     if request.method == 'POST':
         un_id = request.form['un_id']
