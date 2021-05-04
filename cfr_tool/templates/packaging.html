@@ -90,7 +90,7 @@
     <div class="packaging-container">
         <div id="packaging-requirements" class="column">
 
-            <h2>173.{{ results['part_num'] }}</h2>
+            <h2>{{ results['part_num'] }}</h2>
             <h3>Click on highlighted packaging codes to view its packaging standards to the right.</h3>
             {%for i in range(0, len)%}
             <p>{{results['text'][i]|safe}}</p>

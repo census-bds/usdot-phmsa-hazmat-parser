@@ -29,7 +29,8 @@ def build_results(un_id, bulk, pg, db):
     requirement_query = ins.db.execute('''
             SELECT section FROM packaging_instructions
             WHERE row_id = {} AND bulk = {}
-        '''.format(row_id, 1 if bulk else 0))
+        '''.format(row_id, 1 if bulk == 'true' else 0))
+
     requirement = requirement_query.fetchone()
     requirement = requirement[0]
     
@@ -67,7 +68,7 @@ def code_lookup():
     if code:
         cur = db.get_db().cursor()
         cur.execute('''
-            SELECT * FROM packaging_standards WHERE full_code='{}'
+            SELECT * FROM packaging_standards WHERE packaging_code='{}'
         '''.format(code))
         rows = cur.fetchall()
         #For now, grabs the first result

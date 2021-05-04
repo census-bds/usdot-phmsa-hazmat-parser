@@ -38,12 +38,12 @@ class PerformancePackaging(PackagingCodes):
         ''')
         self.db.execute('''
             CREATE TABLE packaging_standards (
-                full_code varchar not null,
+                packaging_code varchar not null,
                 kind_id integer,
                 material_id text,
                 type text,
                 section integer,
-                FOREIGN KEY(full_code) REFERENCES packaging_requirements(packaging_code)
+                FOREIGN KEY(packaging_code) REFERENCES packaging_requirements(packaging_code)
             );
         ''')
 
@@ -51,7 +51,7 @@ class PerformancePackaging(PackagingCodes):
         self.create_packaging_standards_table()
         self.db.executemany('''
             INSERT INTO packaging_standards (
-                full_code,
+                packaging_code,
                 kind_id,
                 material_id,
                 type,

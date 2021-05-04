@@ -45,7 +45,7 @@ class SpecPackaging:
         self.db.execute('''
             CREATE TABLE spec_packaging(
                 section text,
-                code text,
+                packaging_code text,
                 description text
             );
         ''')
@@ -55,7 +55,7 @@ class SpecPackaging:
         self.db.execute(
             '''
             CREATE TABLE tank_cars (
-                code varchar,
+                packaging_code varchar,
                 description text,
                 part text,
                 subpart integer
