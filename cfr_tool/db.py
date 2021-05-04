@@ -13,7 +13,7 @@ from . import spec_packaging
 '''
 import table, explosives, nonbulk, soup
 '''
-DATABASE_PATH = '/phmsa/hazmat-parser/instance'
+DATABASE_PATH = '../hazmat-parser/instance'
 
 def get_db():
     if has_app_context():

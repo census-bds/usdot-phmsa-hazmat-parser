@@ -4,14 +4,12 @@ This tool parses Title 49 of the CFR for regulations about shipping hazardous ma
 
 ## Set up
 
-1. Download requirements or create a new environment using the provided requirements.txt file by running either of the following:
+1. Create a conda environment using the provided environment.yml file by running:
+
 ```
-pip install -r requirements.txt 
+conda create --name <env> --file environment.yml
 ```
-```
-conda create --name <env> --file requirements.txt
-```
-2. Before initializing the database, choose a directory where your database will be saved, and enter the path after the DATABASE_PATH variable within cfr_tool/db.py. For example, the variable is currently set to `DATABASE_PATH = '/phmsa/hazmat-parser/instance'`. Modify that path to your location of choice. 
+2. Before initializing the database, choose a directory where your database will be saved, and enter the path after the DATABASE_PATH variable within cfr_tool/db.py. For example, the variable is currently set to `DATABASE_PATH = '../hazmat-parser/instance'`. Modify that path to your location of choice. 
 
 2. Run flask in development mode with FLASK_APP=cfr_tool. Afterwards,  run `flask init-db` before `flask run`. The command `flask init-db` initializes the database and will store the file hazmat_parser.sqlite within your chosen directory. Once the database is initialized, `flask init-db` will no longer be necessary. The command `flask run` opens the web app.
 <br>
