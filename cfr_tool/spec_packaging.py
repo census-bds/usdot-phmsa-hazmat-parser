@@ -57,6 +57,7 @@ class SpecPackaging:
             CREATE TABLE tank_cars (
                 code varchar,
                 description text,
+                part text,
                 subpart integer
             );
             '''
@@ -73,6 +74,6 @@ class SpecPackaging:
             description_pattern = re.compile(pattern.TANK_CAR_DESCRIPTION)
             description = description_pattern.findall(subpart.text)
             for code in codes:
-                insert.append((code, description[0], subpart.text))
-        self.db.executemany("INSERT INTO tank_cars VALUES (?, ?, ?)", insert)
+                insert.append((code, description[0], '179', subpart.text))
+        self.db.executemany("INSERT INTO tank_cars VALUES (?, ?, ?, ?)", insert)
         pass

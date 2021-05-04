@@ -54,7 +54,7 @@ Highlighted UNNA packaging numbers are clickable and will return corresponding p
 
 To access the database:
 
-1. Open up sqlite by running `sqlite`.
+1. Open up sqlite by running `sqlite3`.
 
 2. In sqlite, run `.open <db path>`. By default, the database is located in 'instance/hazmat-parser.sqlite'. This should be recorded in the DATABASE_PATH variable within cfr_tool/db.py.
 
