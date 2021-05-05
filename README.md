@@ -20,6 +20,7 @@ $ export FLASK_ENV=development
 $ flask init-db
 $ flask run
 ```
+
 For Windows cmd:
 ```
 > set FLASK_APP=cfr-tool
