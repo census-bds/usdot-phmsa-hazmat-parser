@@ -31,10 +31,9 @@ def build_results(un_id, bulk, pg, db):
             WHERE row_id = {} AND bulk = {}
         '''.format(row_id, 1 if bulk == 'true' else 0))
 
-    requirement = requirement_query.fetchone()
-    requirement = requirement[0]
-    
     try:
+        requirement = requirement_query.fetchone()
+        requirement = requirement[0]
         spans_paragraphs = ins.get_spans_paragraphs(requirement)
     except:
         spans_paragraphs = None

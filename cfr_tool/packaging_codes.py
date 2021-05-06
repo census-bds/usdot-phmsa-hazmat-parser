@@ -26,34 +26,35 @@ class PackagingCodes:
         (requirement, authorizing_agency, packaging_code, pattern_match)
         '''
         paragraphs = self._grab_paragraphs(req)
-        codes = []
-        for p in paragraphs:
-            agency_spans = []
-            agencies = []
-            code_spans = []
-            for agency_pattern in self.agency_patterns:
-                for m in agency_pattern.finditer(p[1]):
-                    agency_spans.append(m.span())
-                    agencies.append(m.group())
-            for m in self.spec_code_pattern.finditer(p[1]):
-                code_span = m.span()
-                code = m.group()
-                diffs = {code_span[0] - agency[0]: i \
-                    for i, agency in enumerate(agency_spans)}
-                positive_vals = [i for i in diffs.keys() if i > 0]
-                closest_agency = agencies[diffs[min(positive_vals)]]
-                codes.append(
-                    (req, closest_agency, code, 'spec', p[0], code_span[0], code_span[1])
-                )
-                code_spans.append(code_span)
-            for m in self.perf_code_pattern.finditer(p[1]):
-                code_span = m.span()
-                code = m.group()
-                if not self._check_overlap(code_span, code_spans):
+        if paragraphs:
+            codes = []
+            for p in paragraphs:
+                agency_spans = []
+                agencies = []
+                code_spans = []
+                for agency_pattern in self.agency_patterns:
+                    for m in agency_pattern.finditer(p[1]):
+                        agency_spans.append(m.span())
+                        agencies.append(m.group())
+                for m in self.spec_code_pattern.finditer(p[1]):
+                    code_span = m.span()
+                    code = m.group()
+                    diffs = {code_span[0] - agency[0]: i \
+                        for i, agency in enumerate(agency_spans)}
+                    positive_vals = [i for i in diffs.keys() if i > 0]
+                    closest_agency = agencies[diffs[min(positive_vals)]]
                     codes.append(
-                        (req, None, code, 'perf', p[0], code_span[0], code_span[1])
+                        (req, closest_agency, code, 'spec', p[0], code_span[0], code_span[1])
                     )
-        return codes
+                    code_spans.append(code_span)
+                for m in self.perf_code_pattern.finditer(p[1]):
+                    code_span = m.span()
+                    code = m.group()
+                    if not self._check_overlap(code_span, code_spans):
+                        codes.append(
+                            (req, None, code, 'perf', p[0], code_span[0], code_span[1])
+                        )
+            return codes
 
     def grab_pattern_match_spans(self, p):
         '''
@@ -116,7 +117,7 @@ class PackagingCodes:
             packaging_ids = []
             for spans, desc in zip(codes, descs):
                 for span in spans:
-                    packaging_ids.append(desc[span[0]: span[1]])
+                    packaging_ids.append(desc[1][span[0]: span[1]])
             return packaging_ids
 
 

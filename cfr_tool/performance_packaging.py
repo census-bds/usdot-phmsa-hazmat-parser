@@ -14,21 +14,10 @@ class PerformancePackaging(PackagingCodes):
 
     def parse_standards(self):
         standards = []
-        kind_pattern = re.compile('^\d{1,2}')
-        material_pattern = re.compile('(?<=\d)[A-Z]{1,2}(?=$|\d)')
- 
         for section in range(self.START, self.END + 1):
-            codes = self.get_codes(section)
+            codes = self.grab_agency_code_pattern("{}.{}".format(self.part, section))
             if codes:
-                for code in set(codes):
-                    kind = kind_pattern.search(code)
-                    material = material_pattern.search(code)
-                    code_row = (code,
-                                int(kind.group(0)) if kind else None,
-                                material.group(0) if material else None,
-                                "performance",
-                                section)
-                    standards.append(code_row)
+                standards += codes
         return standards
     
 
@@ -38,11 +27,13 @@ class PerformancePackaging(PackagingCodes):
         ''')
         self.db.execute('''
             CREATE TABLE packaging_standards (
-                packaging_code varchar not null,
-                kind_id integer,
-                material_id text,
-                type text,
                 section integer,
+                authorizing_agency text,
+                packaging_code text not null,
+                type text,
+                paragraph text,
+                span_0 integer,
+                span_1 integer,
                 FOREIGN KEY(packaging_code) REFERENCES packaging_requirements(packaging_code)
             );
         ''')
@@ -51,12 +42,14 @@ class PerformancePackaging(PackagingCodes):
         self.create_packaging_standards_table()
         self.db.executemany('''
             INSERT INTO packaging_standards (
+                section,
+                authorizing_agency,
                 packaging_code,
-                kind_id,
-                material_id,
+                paragraph,
                 type,
-                section
+                span_0,
+                span_1
             ) VALUES (
-                ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?, ?
             )
         ''', self.parse_standards())
