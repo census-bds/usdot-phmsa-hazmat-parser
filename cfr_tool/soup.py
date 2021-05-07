@@ -8,6 +8,8 @@ import bs4
 import xml.etree.ElementTree as ET
 import networkx as nx
 
+from . import clean_text as ct
+
 class Soup:
     CACHE_DIRECTORY = "cfr_cache"
 
@@ -89,46 +91,26 @@ class Soup:
                        numeral_pattern: 'i',
                        uppercase_letter_pattern: 'A'}
         # letter, number, numeral, uppercase
-        indices = [None, None, None, None]
+        indices = [None, None, None, None, None]
+        upper_roman = 'I'
         def _reset_indices_after(ix):
             for i in range(ix + 1, len(indices)):
                 indices[i] = None
-        prior_match_ix = None
+        current_match_ix = 0
         for pi, paragraph in enumerate(paragraphs):
             beginning = paragraph.text.strip()[:6]
-            current_match_ix = None
             for ix, pattern in enumerate(patterns):
                 match = pattern.findall(beginning)
-                no_prior_match = True
                 if match:
                     assert len(match) == 1
-                    indices[ix] = match[0]
-                    current_match_ix = ix
-                    prior_match_ix = current_match_ix
-                    no_prior_match = False
-                    _reset_indices_after(ix)
+                    indices[ix + 1] = match[0]
+                    current_match_ix = ix + 1
+                    _reset_indices_after(ix + 1)
                     yield tuple(indices), paragraph
-            if current_match_ix:
-                continue
-            if no_prior_match and current_match_ix == None:
-                if pi == 0:
-                    continue
-                else:
-                    current_match_ix = prior_match_ix
-                    try:
-                        prior_character = str(int(prior_character) + 1)
-                    except ValueError:
-                        prior_character = chr(ord(prior_character) + 1)
-                    # TO DO: DEAL WITH INCREMENTING ROMAN NUMERALS.
-            else:
-                #TO DO: Deal with new <fp> tags that come after the uppercase letter pattern.
-                # For now, we go back to the letter pattern.
-                current_match_ix = prior_match_ix + 1 if prior_match_ix < 3 else 0
-                no_prior_match = True
-                prior_match_ix = current_match_ix
-                prior_character = start_chars[patterns[current_match_ix]]
-            indices[current_match_ix] = prior_character
-            _reset_indices_after(ix)
-            yield tuple(indices), paragraph
+            if current_match_ix == 0:
+                indices[current_match_ix] = upper_roman
+                upper_roman = ct.int_to_roman(ct.roman_to_int(upper_roman) + 1)
+                _reset_indices_after(0)
+                yield tuple(indices), paragraph
 
             

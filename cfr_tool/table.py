@@ -6,23 +6,19 @@ class HazmatTable:
         # Maps hazmat table column numbers containing nonunique values to new tables and column names
         self.nonunique_map = {
             0: ("symbols", "symbol"),
+            1: ("proper_shipping_names", "proper_shipping_name"),
             5: ("label_codes", "label_code"),
             6: ("special_provisions", "special_provision"),
             7: ("packaging_exceptions", "exception"),
-            # 8: ("packaging_instructions", "section"),
-            # 9: ("packaging_instructions", "section"),
             13: ("stowage_codes", "stowage_code")
         }
         self.db = db
         self.soup = soup
+        self.see_shipping_names = []
 
 
     def create_nonunique_table(self, table_name, col_name):
         self.db.executescript("DROP TABLE IF EXISTS {};".format(table_name))
-        '''
-        Packaging requirements will be loaded later. Nonbulk and bulk requirements will
-        need a foreign key to this table.
-        '''
         script = '''
                 CREATE TABLE {} (
                 row_id integer not null,
@@ -53,11 +49,13 @@ class HazmatTable:
     def load_nonunique_table(self, row_id, text, table_name, col_name):
         if table_name == "symbols":
             split_text = re.findall("[A-Z]", text)
+            entries = [(row_id, entry.replace("'", "''").strip()) for entry in split_text]
+        elif table_name == "proper_shipping_names":
+            entries = [(row_id, text)]
         else:
             # TO DO: some are split on "," without a space
             split_text = text.split(",")
-        entries = [(row_id, entry.replace("'", "''").strip())
-                for entry in split_text]
+            entries = [(row_id, entry.replace("'", "''").strip()) for entry in split_text]
         self.db.executemany(
             "INSERT INTO {} (row_id, {}) VALUES (?, ?)".format(
                 table_name, col_name),
@@ -90,6 +88,7 @@ class HazmatTable:
         assert rows[0].find_all('ent')[1].text.strip() == \
             'Accellerene, see p-Nitrosodimethylaniline'
         for row in rows:
+            skip_row = False
             ents = row.find_all('ent')
             vals = [pk]
             for i, ent in enumerate(ents):   
@@ -115,17 +114,30 @@ class HazmatTable:
                         symbol = ent.text.strip()
                     if ent.text.strip() != '':
                         if i in self.nonunique_map.keys():
-                            self.load_nonunique_table(pk, ent.text, *self.nonunique_map[i])
+                            if i == 1 and " see " in ent.text:
+                                '''
+                                If the proper shipping name has ' see ' in it, we 
+                                temporarily load with a row_id of 0 and go back one row_id.
+                                '''
+                                pk -= 1
+                                self.see_shipping_names.append(ent.text)
+                                skip_row = True
+                                continue
+                            else:
+                                self.load_nonunique_table(
+                                    pk, ent.text, *self.nonunique_map[i])
                         elif i == 8 or i == 9:
                             self.load_packaging_instructions(pk, ent.text, i)
                         else:
                             vals.append(ent.text.strip().replace("'", "''"))                           
                     elif not i in self.nonunique_map.keys() and i != 3:
                         vals.append(None)
+            pk += 1
+            if skip_row:
+                continue
             vals = (vals + [None] * 7)[:8]
             assert len(vals) == 8
             entries.append(tuple(vals))
-            pk += 1
         return entries
 
     def create_load_hazmat_data(self):
@@ -137,6 +149,7 @@ class HazmatTable:
             '''
             CREATE TABLE hazmat_table (
                 row_id integer not null primary key,
+                hazmat_id integer,
                 hazmat_name text, class_division text,
                 unna_code text, pg text, passenger_max_quant text,
                 cargo_max_quant text, stowage_location text
@@ -172,7 +185,37 @@ class HazmatTable:
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ''', self.create_hazmat_entries()
         )
+        self.handle_see_shipping_names()
+
+    def handle_see_shipping_names(self):
+        see_names_load = []
+        for name in self.see_shipping_names:
+            assert ' see ' in name
+            see_name = name[name.find(' see ') + 5:].strip()
+            real_row_id = self.db.execute(
+                '''
+                SELECT row_id
+                FROM proper_shipping_names
+                WHERE proper_shipping_name = ?
+                ''', [see_name]
+            )
+            row_id = real_row_id.fetchone()
+            if row_id:
+                see_names_load.append((row_id[0], name))
+            # TO DO: think of a way to address names that refer to more than one other row
+        self.db.executemany(
+            '''
+            INSERT INTO proper_shipping_names (
+                'row_id',
+                'proper_shipping_name'
+            )
+            VALUES (
+                ?, ?
+            )
+            ''', see_names_load
+        )
             
+                        
 
     def get_packaging_173(self, bulk, row_id):
         if bulk:
