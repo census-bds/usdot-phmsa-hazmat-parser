@@ -1,7 +1,7 @@
 # hazmat-parser
 
-This tool parses Title 49 of the CFR for regulations about shipping hazardous materials, namely the Hazardous Materials Regulations (HMR), located in parts 100-185. The specific links that are parsed are:
-https://www.govinfo.gov/content/pkg/CFR-2019-title49-vol2/xml/CFR-2019-title49-vol2.xml
+This tool parses Title 49 of the CFR for regulations about shipping hazardous materials, namely the Hazardous Materials Regulations (HMR), located in parts 100-185. The specific links that are parsed are:<br>
+https://www.govinfo.gov/content/pkg/CFR-2019-title49-vol2/xml/CFR-2019-title49-vol2.xml<br>
 https://www.govinfo.gov/content/pkg/CFR-2019-title49-vol3/xml/CFR-2019-title49-vol3.xml
 
 
