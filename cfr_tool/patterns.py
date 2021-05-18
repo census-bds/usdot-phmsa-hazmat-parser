@@ -5,6 +5,12 @@ PERF_PACKAGING = "([\d]{1,2}[A-Z]+\d*)"
 SPEC_PACKAGING_INSTRUCTIONS = "(?<=\s)(\d{2,}[A-Z]*\d*[A-Z]*)(?=[\s,].*tank)(?!\s°)"
 AUTHORIZING_AGENCIES = ['AAR', 'DOT', 'IM', 'MC', 'TC']
 AA_PATTERN = ["(?=[^\s])" + agency for agency in AUTHORIZING_AGENCIES]
+
+'''
+Pattern to verify an explosives packaging instruction
+'''
+PI_PATTERN = "\d{3}(\([a-z]\))*"
+
 '''
 SPEC_PACKAGING parses two groups, the first being the code and the 2nd being the
 description.

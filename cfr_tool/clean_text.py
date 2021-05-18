@@ -3,13 +3,32 @@ import regex as re
 '''
 Some utility functions for parsing and cleaning text.
 '''
+def find_unnas(text):
+    '''
+    Returns a list of all UNNA numbers found in a piece of text
+    '''
+    digit_pattern = re.compile('(\d{4})')
+    unna_pattern = re.compile('UN|NA')
+    unna_spans = [(m.span(), m.group()) for m in unna_pattern.finditer(text)]
+    unnas = []
+    for match in digit_pattern.finditer(text):
+        span = match.span()
+        code = match.group()
+        diffs = [span[0] - unna_span[0][0] for unna_span in unna_spans]
+        if diffs:
+            min_diff_idx = diffs.index(min(diffs))
+            if min_diff_idx < 0:
+                continue
+            prefix = unna_spans[min_diff_idx][1]
+            unnas.append(prefix + code)
+    return unnas
 
 def build_packaging_text(spans_paragraphs):
     '''
     Take a list with spans in index 0 and paragraphs in index 1 and apply a <mark> tag
     around the specified spans.
     '''
-    print(spans_paragraphs)
+
     output_html = []
     for i, paragraph in enumerate(spans_paragraphs[1]):
         spans = spans_paragraphs[0][i]

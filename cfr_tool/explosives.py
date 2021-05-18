@@ -1,119 +1,170 @@
 import re
 from . import clean_text as ct
+from . import patterns
 
 class Explosives:
     def __init__(self, db, soup):
         self.db = db
         self.soup = soup
+        self.section = "173.62"
 
-    def create_load_explosives(self):
-        self.parse_load_pis()
-        self.parse_load_packing_methods()
-    
-    def parse_load_pis(self):
-        self.db.executescript("DROP TABLE IF EXISTS explosives_table;")
-        self.db.executescript('''
-            CREATE TABLE explosives_table (
-                id_num text,
-                packaging_instruction text,
-                FOREIGN KEY (id_num)
-                    REFERENCES hazmat_table (id_num)
-            )
-        ''')
-        explosives = self.soup.find_table("Explosives Table")
-
-        entries = []
-        for row in explosives.find_all('row'):
-            text = [ent.text for ent in row.find_all('ent')]
-            un_na = text[0]
-            pis = text[1].split(' or ')
-            for pi in pis:
-                entries.append((un_na, pi))
-        self.db.executemany('''
-            INSERT INTO explosives_table (id_num, packaging_instruction)
-            VALUES (?, ?)
-        ''', entries)
-
-    def create_packing_methods(self):
-        self.db.executescript("DROP TABLE IF EXISTS packing_methods;")
-        self.db.executescript('''
-            CREATE TABLE packing_methods (
-                packaging_instruction text,
-                inner_packagings_type text,
-                intermediate_packagings_type text,
-                outer_packagings_type text,
-                requirements_exceptions text,
-                inner_packagings_material text,
-                intermediate_packagings_material text,
-                outer_packagings_material text,
-                FOREIGN KEY (packaging_instruction)
-                    REFERENCES explosives_table (packaging_instruction)
+    def create_explosives_table(self):
+        self.db.execute(
+            '''
+            DROP TABLE IF EXISTS explosives;
+            '''
+        )
+        self.db.execute(
+            '''
+            CREATE TABLE explosives (
+                unna_code text,
+                pi text not null,
+                FOREIGN KEY (unna_code) REFERENCES hazmat_table (unna_code),
+                FOREIGN KEY (pi) REFERENCES pis
             );
-        ''')
-        pass
+            '''
+        )
+        return
+    
+    def create_pis_table(self):
+        self.db.execute(
+            '''
+            DROP TABLE IF EXISTS pis;
+            '''
+        )
+        self.db.execute(
+            '''
+            CREATE TABLE pis (
+                pi text primary key,
+                inner text,
+                intermediate text,
+                outer text
+            )
+            '''
+        )
 
-    def create_outer_packagings(self):
-        self.db.executescript("DROP TABLE IF EXISTS outer_packagings;")
-        self.db.executescript('''
-            CREATE TABLE outer_packagings (
-                packaging_instruction text,
+    def create_explosive_pis_tables(self):
+        self.db.execute(
+            '''
+            DROP TABLE IF EXISTS explosive_pi_unnas;
+            '''
+        )
+        self.db.execute(
+            '''
+            CREATE TABLE explosive_pi_unnas (
+                pi text,
+                column text,
+                unna_code text,
+                FOREIGN KEY (unna_code) REFERENCES hazmat_table (unna_code),
+                FOREIGN KEY (pi) REFERENCES pis (pi)
+            );
+            '''
+        )
+        self.db.execute(
+            '''
+            DROP TABLE IF EXISTS explosive_pi_packaging_codes;
+            '''
+        )
+        self.db.execute(
+            '''
+            CREATE TABLE explosive_pi_packaging_codes (
+                pi text,
+                column text,
                 packaging_code text,
-                FOREIGN KEY (packaging_instruction)
-                    REFERENCES explosives_table (packaging_instruction),
-                FOREIGN KEY (packaging_code)
-                    REFERENCES packagings (packaging_code)
+                FOREIGN KEY (pi) REFERENCES pis (pi),
+                FOREIGN KEY (column) REFERENCES explosives_pis_unnas (column)
             );
-        ''')
+            '''
+        )
+        return
     
-
-    def load_outer_packagings(self, pi, outer_packagings):
-        packaging_parsed = ct.parse_names_codes(outer_packagings)
-        self.db.executemany('''
-            INSERT INTO outer_packagings (
-                packaging_instruction,
-                packaging_code
-            ) VALUES (
-                ?, ?
-            )
-            ''', [(pi, packaging[0]) for packaging in packaging_parsed])
-
-    def parse_load_packing_methods(self):
-        self.create_outer_packagings()
-        self.create_packagings()
-        packing_rows = self.soup.find_table("Table of Packing Methods").find_all('row')
-        symbol = True
-        full_data = []
-        for row in packing_rows:
-            ents = row.find_all('ent')
-            if symbol:
-                #make sure there are three digits at the beginning
-                three_digits = re.compile("\d\d\d")
-                assert three_digits.match(ents[0].text)
-                data = [ct.clean_new_lines(ent) for ent in ents]
-                while len(data) < 4:
-                    data.append(None)
+    def parse_explosives_table(self):
+        '''
+        Returns items to be inserted into explosives table
+        '''
+        explosives_table = self.soup.find_table('Explosives Table')
+        rows = explosives_table.find_all('row')
+        ents = [row.find_all('ent') for row in rows]
+        insert = []
+        for ent in ents:
+            unna_code = ent[0].text
+            pi = ent[1].text
+            if " or " in pi:
+                pis = pi.split(' or ')
+                for p in pis:
+                    insert.append((p, unna_code))
             else:
-                if (ents[0].text == "PARTICULAR PACKING REQUIREMENTS OR EXCEPTIONS:" or \
-                    ents[0].text == "Particular Packaging Requirements:") and \
-                    len(ents) == 1:
+                insert.append((pi, unna_code))
+        return insert
+    
+    def parse_packing_methods(self):
+        '''
+        Returns 3 lists of tuples to be inserted into pis, explosive_pi_unnas, and
+        explosive_pi_packaging_codes
+        '''
+        column_map = {
+            0: 'requirements_exceptions',
+            1: 'inner_packagings',
+            2: 'intermediate_packagings',
+            3: 'outer_packagings'
+        }
+        packing_methods_table = self.soup.find_table('Table of Packing Methods')
+        rows = packing_methods_table.find_all('row')
+        pi = None
+        pis_insert = []
+        explosive_pi_unnas_insert = []
+        explosive_pi_packaging_codes_insert = []
+        for row in rows:
+            ents = row.find_all('ent')
+            first_cell = ents[0].text
+            pi_pattern = re.compile(patterns.PI_PATTERN)
+            pi_match = pi_pattern.match(first_cell)
+            if pi_match:
+                pi = pi_match.group()
+                if len(ents) < 4:
+                    pis_insert.append((pi, None, None, None))
                     continue
-                for ent in ents:
-                    data.append(ct.clean_new_lines(ent))
-                while len(data) < 8:
-                    data.append(None)
-                if data[7]:
-                    self.load_outer_packagings(data[0], data[7])
-                full_data.append(tuple(data))
-            symbol = not symbol
-        self.db.executemany('''
-            INSERT INTO packing_methods (
-                packaging_instruction,
-                inner_packagings_type,
-                intermediate_packagings_type,
-                outer_packagings_type,
-                requirements_exceptions,
-                inner_packagings_material,
-                intermediate_packagings_material,
-                outer_packagings_material
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', full_data)
+                else:
+                    pis_insert.append((pi, ents[1].text, ents[2].text, ents[3].text))
+            else:
+                for i, ent in enumerate(ents):
+                    unna_codes = ct.find_unnas(ent.text)
+                    perf_pattern = re.compile(patterns.PERF_PACKAGING)
+                    packaging_codes = perf_pattern.findall(ent.text)
+                    for unna_code in unna_codes:
+                        explosive_pi_unnas_insert.append((pi, column_map[i], unna_code))
+                    for packaging_code in packaging_codes:
+                        explosive_pi_packaging_codes_insert.append(
+                            (pi, column_map[i], packaging_code))
+
+        return pis_insert, explosive_pi_unnas_insert, explosive_pi_packaging_codes_insert
+
+    def parse_load_all_explosives(self):
+        self.create_pis_table()
+        self.create_explosive_pis_tables()
+        self.db.executemany(
+            '''
+            INSERT INTO explosives (unna_code, pi) VALUES (?, ?)
+            ''', self.parse_explosives_table()
+        )
+        self.db.commit()
+        self.create_explosive_pis_tables()
+        pis_insert, explosive_unnas, explosive_packaging_codes = \
+            self.parse_packing_methods()
+        self.db.executemany(
+            '''
+            INSERT INTO pis (pi, inner, intermediate, outer) VALUES (?, ?, ?, ?)
+            ''', pis_insert
+        )
+        self.db.executemany(
+            '''
+            INSERT INTO explosive_pi_unnas (pi, column, unna_code) VALUES (?, ?, ?)
+            ''', explosive_unnas
+        )
+        self.db.executemany(
+            '''
+            INSERT INTO explosive_pi_packaging_codes (pi, column, packaging_code)
+            VALUES (?, ?, ?)
+            ''', explosive_packaging_codes
+        )
+        return
