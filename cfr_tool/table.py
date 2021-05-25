@@ -10,7 +10,7 @@ class HazmatTable:
             5: ("label_codes", "label_code"),
             6: ("special_provisions", "special_provision"),
             7: ("packaging_exceptions", "exception"),
-            13: ("stowage_codes", "stowage_code")
+            13: ("other_provisions", "other_provision")
         }
         self.db = db
         self.soup = soup
@@ -80,10 +80,11 @@ class HazmatTable:
         simultaneously calls 'load_nonunique_table' to insert values into those tables
         while parsing.
         '''
-        hazmat_tables = self.soup.find_table("§ 172.101 Hazardous Materials Table")
+        hazmat_tables = self.soup.find_table('§\u2009172.101 Hazardous Materials Table')
         pk = 1
         entries = []
         rows = hazmat_tables.find_all('row')[1:]
+
         #Checking that first row is 'Accellerene'
         assert rows[0].find_all('ent')[1].text.strip() == \
             'Accellerene, see p-Nitrosodimethylaniline'
@@ -100,7 +101,7 @@ class HazmatTable:
                         blank, copy from those and load in the prior entry's symbol if it
                         wasn't blank.
                         '''
-                        vals.append(entries[-1][3])
+                        vals.append(entries[-1][2])
                         if not vals[1]:
                             vals[1] = entries[-1][1]
                         if not vals[2]:
@@ -135,8 +136,8 @@ class HazmatTable:
             pk += 1
             if skip_row:
                 continue
-            vals = (vals + [None] * 7)[:8]
-            assert len(vals) == 8
+            vals = (vals + [None] * 7)[:7]
+            assert len(vals) == 7
             entries.append(tuple(vals))
         return entries
 
@@ -149,8 +150,7 @@ class HazmatTable:
             '''
             CREATE TABLE hazmat_table (
                 row_id integer not null primary key,
-                hazmat_id integer,
-                hazmat_name text, class_division text,
+                class_division text,
                 unna_code text, pg text, passenger_max_quant text,
                 cargo_max_quant text, stowage_location text
             );
@@ -174,7 +174,6 @@ class HazmatTable:
             '''
             INSERT INTO 'hazmat_table' (
                 'row_id',
-                'hazmat_name',
                 'class_division',
                 'unna_code',
                 'pg',
@@ -182,7 +181,7 @@ class HazmatTable:
                 'cargo_max_quant',
                 'stowage_location'
                 )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             ''', self.create_hazmat_entries()
         )
         self.handle_see_shipping_names()
