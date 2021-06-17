@@ -26,7 +26,7 @@ $ flask run
 
 For Windows cmd:
 ```
-> set FLASK_APP=cfr-tool
+> set FLASK_APP=cfr_tool
 > set FLASK_ENV=development
 > flask init-db
 > flask run
