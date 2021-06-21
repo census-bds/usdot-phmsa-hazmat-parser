@@ -115,10 +115,11 @@ class HazmatTable:
                         symbol = ent.text.strip()
                     if ent.text.strip() != '':
                         if i in self.nonunique_map.keys():
-                            if i == 1 and " see " in ent.text:
+                            if i == 1 and " see " in ent.text and len(ents) < 3:
                                 '''
-                                If the proper shipping name has ' see ' in it, we 
-                                temporarily load with a row_id of 0 and go back one row_id.
+                                If the proper shipping name has ' see ' in it and
+                                there is no UNNA value in that row, we temporarily
+                                load with a row_id of 0 and go back one row_id.
                                 '''
                                 pk -= 1
                                 self.see_shipping_names.append(ent.text)
