@@ -140,8 +140,8 @@ class Explosives:
         return pis_insert, explosive_pi_unnas_insert, explosive_pi_packaging_codes_insert
 
     def parse_load_all_explosives(self):
+        self.create_explosives_table()
         self.create_pis_table()
-        self.create_explosive_pis_tables()
         self.db.executemany(
             '''
             INSERT INTO explosives (unna_code, pi) VALUES (?, ?)
