@@ -18,10 +18,10 @@ conda env create -f environment.yml
 <br>
 For Linux and Mac:
 ```
-$ export FLASK_APP=cfr_tool
-$ export FLASK_ENV=development
-$ flask init-db
-$ flask run
+ export FLASK_APP=cfr_tool
+ export FLASK_ENV=development
+ flask init-db
+ flask run
 ```
 
 For Windows cmd:
