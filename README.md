@@ -16,14 +16,14 @@ conda env create -f environment.yml
 
 2. Run flask in development mode with FLASK_APP=cfr_tool. Afterwards,  run `flask init-db` before `flask run`. The command `flask init-db` initializes the database and will store the file hazmat_parser.sqlite within your chosen directory. Once the database is initialized, `flask init-db` will no longer be necessary. The command `flask run` opens the web app.
 <br>
+
 For Linux and Mac:
 ```
- > export FLASK_APP=cfr_tool
- > export FLASK_ENV=development
- > flask init-db
- > flask run
+> export FLASK_APP=cfr_tool
+> export FLASK_ENV=development
+> flask init-db
+> flask run
 ```
-
 For Windows cmd:
 ```
 > set FLASK_APP=cfr_tool
