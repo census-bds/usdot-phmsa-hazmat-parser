@@ -13,14 +13,16 @@ def build_results(un_id, bulk, pg, db):
     table = "bulk_packaging" if bulk else "non_bulk_packaging"
     if pg:
         query_text = '''
-        SELECT row_id, proper_shipping_name, class_division FROM hazmat_table
+        SELECT hazat_table.row_id, proper_shipping_name, class_division
+        FROM hazmat_table
         JOIN proper_shipping_names
         ON hazmat_table.row_id = proper_shipping_names.row_id
         WHERE unna_code = '{}' and pg = '{}';
         '''.format(un_id, pg)
     else:
         query_text = '''
-        SELECT row_id, proper_shipping_name, class_division FROM hazmat_table
+        SELECT hazmat_table.row_id, proper_shipping_name, class_division
+        FROM hazmat_table
         JOIN proper_shipping_names
         ON hazmat_table.row_id = proper_shipping_names.row_id
         WHERE unna_code = '{}'
