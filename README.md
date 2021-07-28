@@ -7,10 +7,11 @@ https://www.govinfo.gov/content/pkg/CFR-2019-title49-vol3/xml/CFR-2019-title49-v
 
 ## Set up
 
-1. Create a conda environment using the provided environment.yml file by running:
+1. Create and activate a conda environment using the provided environment.yml file by running:
 
 ```
 conda env create -f environment.yml
+conda activate cfr_env
 ```
 2. Before initializing the database, choose a directory where your database will be saved, and enter the path after the DATABASE_PATH variable within cfr_tool/db.py. For example, the variable is currently set to `DATABASE_PATH = '../hazmat-parser/instance'`. Modify that path to your location of choice. 
 
