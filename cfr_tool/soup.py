@@ -98,7 +98,8 @@ class Soup:
                 indices[i] = None
         current_match_ix = 0
         for pi, paragraph in enumerate(paragraphs):
-            beginning = paragraph.text.strip()[:6]
+            par_text = paragraph.text
+            beginning = par_text.strip()[:6]
             for ix, pattern in enumerate(patterns):
                 match = pattern.findall(beginning)
                 if match:
@@ -106,11 +107,32 @@ class Soup:
                     indices[ix + 1] = match[0]
                     current_match_ix = ix + 1
                     _reset_indices_after(ix + 1)
-                    yield tuple(indices), paragraph
+                    
+                    no_beginning = True
+                    sub_idx = pi + 1
+                    while no_beginning and sub_idx < len(paragraphs):
+                        for sub_pattern in patterns:
+                            next_paragraph = paragraphs[sub_idx]
+                            if len(next_paragraph.text.strip()) > 6:
+                                sub_match = sub_pattern.findall(
+                                    next_paragraph.text.strip()[:6])
+                            else:
+                                sub_match = sub_pattern.findall(
+                                    next_paragraph.text.strip())                                
+                            if sub_match:
+                                no_beginning = False
+                                break
+                        if no_beginning:
+                            par_text += "\n"
+                            par_text += next_paragraph.text
+                            sub_idx += 1
+                    yield tuple(indices), par_text
+
             if current_match_ix == 0:
                 indices[current_match_ix] = upper_roman
                 upper_roman = ct.int_to_roman(ct.roman_to_int(upper_roman) + 1)
                 _reset_indices_after(0)
-                yield tuple(indices), paragraph
+                yield tuple(indices), par_text
+
 
             

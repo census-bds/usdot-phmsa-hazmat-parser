@@ -80,7 +80,8 @@ class HazmatTable:
         simultaneously calls 'load_nonunique_table' to insert values into those tables
         while parsing.
         '''
-        hazmat_tables = self.soup.find_table('§\u2009172.101 Hazardous Materials Table')
+        hazmat_tables = self.soup.find_table(
+            '§\u2009172.101 Hazardous Materials Table')
         pk = 1
         entries = []
         rows = hazmat_tables.find_all('row')[1:]
