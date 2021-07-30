@@ -82,18 +82,18 @@ According to the packaging requirements, how many hazmat UNNA numbers are associ
 SELECT COUNT(DISTINCT unna_code) 
 FROM hazmat_table
 JOIN packaging_instructions
-ON hazmat_table.row_id = non_bulk_packaging.row_id
+ON hazmat_table.row_id = packaging_instructions.row_id
 JOIN packaging_requirements 
 ON packaging_requirements.section = packaging_instructions.section
 WHERE packaging_requirements.packaging_code = '5H4' AND packaging_instructions.bulk = 0;
 ```
 
-According to the packaging requirements, which hazmat are associated with bulk shipping in a DOT 115 cargo tank?
+According to the packaging requirements, which UNNA numbers are associated with bulk shipping in a DOT 115 cargo tank?
 ```
-SELECT DISTINCT unna_code, hazmat_name
+SELECT DISTINCT unna_code
 FROM hazmat_table
 JOIN packaging_instructions
-ON hazmat_table.row_id = bulk_packaging.row_id 
+ON hazmat_table.row_id = packaging_instructions.row_id 
 JOIN packaging_requirements 
 ON packaging_requirements.section = packaging_instructions.section
 WHERE packaging_requirements.authorizing_agency = 'DOT'
