@@ -7,11 +7,26 @@ from . import soup
 from . import clean_text as ct
 from . import instructions
 
+import re
 
+bp = flask.Blueprint('packaging', __name__)
 
 def build_results(un_id, bulk, pg, db):
-    print("bulk")
-    print(bulk)
+    un_na_pattern = re.compile('([uU][nN]|[nN][aA])')
+    any_digits = re.compile('\d+')
+    unna_match = un_na_pattern.search(un_id)
+    digits_match = any_digits.search(un_id)
+    if digits_match:
+        digits = digits_match.group(0)
+        if len(digits) <= 4:
+            if unna_match:
+                unna = unna_match.group(0)
+                clean_unna = unna.upper() + ("0000" + digits)[-4:]
+            else:
+                #If 'UN/NA' prefix isn't specified, we assume "UN"
+                clean_unna = "UN" + ("0000" + digits)[:4]
+    print("clean unna")
+    print(clean_unna)
     if pg:
         query_text = '''
         SELECT hazmat_table.row_id, proper_shipping_name, class_division
@@ -19,7 +34,7 @@ def build_results(un_id, bulk, pg, db):
         JOIN proper_shipping_names
         ON hazmat_table.row_id = proper_shipping_names.row_id
         WHERE unna_code = '{}' and pg = '{}';
-        '''.format(un_id, pg)
+        '''.format(clean_unna, pg)
     else:
         query_text = '''
         SELECT hazmat_table.row_id, proper_shipping_name, class_division
@@ -27,7 +42,7 @@ def build_results(un_id, bulk, pg, db):
         JOIN proper_shipping_names
         ON hazmat_table.row_id = proper_shipping_names.row_id
         WHERE unna_code = '{}'
-        '''.format(un_id)
+        '''.format(clean_unna)
     print(query_text)
     row_id_query = db.execute(query_text)
     #TO DO : make sure that UNNA code and pg uniquely identify each row.
@@ -60,6 +75,8 @@ def build_results(un_id, bulk, pg, db):
             'text': packaging_text,
             'special_provisions': ins.get_special_provisions(row_id)}
 
+
+@bp.route('/',  methods=('GET', 'POST'))
 def code_lookup():
     print(flask.request.args)
     un = flask.request.args.get("un", None)
