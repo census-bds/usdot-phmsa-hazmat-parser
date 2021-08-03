@@ -95,7 +95,7 @@ class PackagingCodes:
         section_tag = self.soup.get_section_text(section)
         if section_tag:
             paragraphs = self.soup.get_section_paragraphs(section)
-            return [(d, p.text) for d, p in paragraphs.nodes().data('paragraph')]
+            return [(d, p) for d, p in paragraphs.nodes().data('paragraph')]
 
     def get_spans_paragraphs(self, section):
         '''

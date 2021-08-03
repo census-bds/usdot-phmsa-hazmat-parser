@@ -10,7 +10,6 @@ from . import clean_text as ct
 bp = Blueprint('packaging', __name__)
 
 def build_results(un_id, bulk, pg, db):
-    table = "bulk_packaging" if bulk else "non_bulk_packaging"
     if pg:
         query_text = '''
         SELECT hazat_table.row_id, proper_shipping_name, class_division

@@ -52,6 +52,7 @@ class HazmatTable:
             entries = [(row_id, entry.replace("'", "''").strip()) for entry in split_text]
         elif table_name == "proper_shipping_names":
             entries = [(row_id, text)]
+
         else:
             # TO DO: some are split on "," without a space
             split_text = text.split(",")
@@ -94,7 +95,7 @@ class HazmatTable:
             ents = row.find_all('ent')
             vals = [pk]
             for i, ent in enumerate(ents):   
-                if ent:                
+                if ent:             
                     if ent.text.strip() == '' and i == 3:
                         '''
                         i == 3 is the UNNA column. If it's blank, load the prior UNNA. If
@@ -109,7 +110,10 @@ class HazmatTable:
                             vals[2] = entries[-1][2]
                         if prior_symbol != '':
                             self.load_nonunique_table(
-                                pk, prior_symbol, "symbols", "symbol")
+                                pk, prior_symbol, *self.nonunique_map[0])
+                        self.load_nonunique_table(
+                            pk, prior_psn, *self.nonunique_map[1]
+                        )
                     elif i == 3:
                         prior_symbol = symbol
                     if i == 0:
@@ -127,6 +131,8 @@ class HazmatTable:
                                 skip_row = True
                                 continue
                             else:
+                                if i == 1:
+                                    prior_psn = ent.text
                                 self.load_nonunique_table(
                                     pk, ent.text, *self.nonunique_map[i])
                         elif i == 8 or i == 9:

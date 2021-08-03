@@ -28,6 +28,7 @@ def build_results(un_id, bulk, pg, db):
         ON hazmat_table.row_id = proper_shipping_names.row_id
         WHERE unna_code = '{}'
         '''.format(un_id)
+    print(query_text)
     row_id_query = db.execute(query_text)
     #TO DO : make sure that UNNA code and pg uniquely identify each row.
     row_id, hazmat_name, class_division = row_id_query.fetchone()
