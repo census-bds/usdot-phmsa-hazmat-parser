@@ -8,8 +8,6 @@ class Instructions(pc.PackagingCodes):
         self.part = 173
         self.db = db
         self.soup = soup
-
-
         
     def get_special_provisions(self, row_id):
         def _match_code(code):

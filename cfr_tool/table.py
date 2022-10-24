@@ -81,15 +81,12 @@ class HazmatTable:
         simultaneously calls 'load_nonunique_table' to insert values into those tables
         while parsing.
         '''
-        hazmat_tables = self.soup.find_table(
-            '§\u2009172.101 Hazardous Materials Table')
+        hazmat_tables = self.soup.find_table('Hazardous Materials Table')
         pk = 1
         entries = []
         rows = hazmat_tables.find_all('row')[1:]
-
         #Checking that first row is 'Accellerene'
-        assert rows[0].find_all('ent')[1].text.strip() == \
-            'Accellerene, see p-Nitrosodimethylaniline'
+        assert 'Accellerene' in rows[0].find_all('ent')[1].text.strip()
         for row in rows:
             skip_row = False
             ents = row.find_all('ent')

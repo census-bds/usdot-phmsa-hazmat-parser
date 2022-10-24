@@ -46,11 +46,7 @@ def init_db():
     hazmat_table = table.HazmatTable(db, soup_2)
     hazmat_table.create_load_hazmat_data()
     print("loaded hazmat")
-    '''
-    explosives_parser = explosives.Explosives(db, soup_2)
-    explosives_parser.create_load_explosives()
-    print("loaded explosives")
-    '''
+
     instructions_parser = instructions.Instructions(db, soup_2)
     instructions_parser.load_all_packaging_reqs()
     print("loaded instructions")
@@ -66,9 +62,9 @@ def init_db():
     spec_parser.get_load_tank_cars()
     print('loaded tank cars')
 
-    explosives_parser = explosives.Explosives(db, soup_2)
-    explosives_parser.parse_load_all_explosives()
-    print('loaded explosives')
+    # explosives_parser = explosives.Explosives(db, soup_2)
+    # explosives_parser.parse_load_all_explosives()
+    # print('loaded explosives')
     '''
     nb = nonbulk.NonBulk(db, soup.Soup(3))
     nb.parse_kind_material()

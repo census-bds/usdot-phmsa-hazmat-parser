@@ -23,7 +23,7 @@ class Soup:
 
     def get_cfr_xml(self, volume):
         # govinfo xml url from which to parse the hazmat table
-        self.url = 'https://www.govinfo.gov/content/pkg/CFR-2019-title49-vol{}/xml/CFR-2019-title49-vol{}.xml'.format(
+        self.url = 'https://www.govinfo.gov/content/pkg/CFR-2021-title49-vol{}/xml/CFR-2021-title49-vol{}-subtitleB-chapI.xml'.format(
             str(volume), str(volume)
         )
         self.cache_path = os.path.join(self.CACHE_DIRECTORY, self.url.split("/")[-1] )
@@ -43,7 +43,7 @@ class Soup:
     def find_table(self, table_title):
         tables = self.parsed_soup.find_all('gpotable')
         return [table for table in tables if table.find('ttitle') \
-            and table.find('ttitle').text == table_title][0]
+            and table_title in table.find('ttitle').text][0]
     
     def get_section_text(self, section):
         section_tag = self.parsed_soup.find(
